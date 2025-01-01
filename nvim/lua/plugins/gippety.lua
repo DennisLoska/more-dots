@@ -1,0 +1,61 @@
+return {
+	{
+		"jackMort/ChatGPT.nvim",
+		enabled = false,
+		event = "VeryLazy",
+		config = function()
+			require("chatgpt").setup({
+				chat = {
+					welcome_message = "Be ye therefore perfect, even as your Father which is in heaven is perfect.",
+					keymaps = {
+						close = "<C-c>",
+						yank_last = "<C-k>",
+						yank_last_code = "<C-y>",
+						scroll_up = "<C-u>",
+						scroll_down = "<C-d>",
+						new_session = "<C-n>",
+						cycle_windows = "<Tab>",
+						cycle_modes = "<C-a>",
+						next_message = "<C-j>",
+						prev_message = "<C-k>",
+						select_session = "<C-Space>",
+						rename_session = "r",
+						delete_session = "d",
+						draft_message = "<C-r>",
+						edit_message = "e",
+						delete_message = "d",
+						toggle_settings = "<C-o>",
+						toggle_sessions = "<C-s>",
+						toggle_help = "<C-h>",
+						toggle_message_role = "<C-r>",
+						toggle_system_role_open = "<C-t>",
+						stop_generating = "<C-x>",
+					},
+				},
+				openai_params = {
+					-- model = "gpt-4-1106-preview",
+					model = "gpt-4o",
+					frequency_penalty = 0,
+					presence_penalty = 0,
+					max_tokens = 4096,
+					temperature = 0,
+					top_p = 1,
+					n = 1,
+				},
+				openai_edit_params = {
+					model = "gpt-3.5-turbo",
+					frequency_penalty = 0,
+					presence_penalty = 0,
+					temperature = 0,
+					top_p = 1,
+					n = 1,
+				},
+			})
+		end,
+		dependencies = {
+			"MunifTanjim/nui.nvim",
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
+		},
+	},
+}
