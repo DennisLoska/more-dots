@@ -1,0 +1,15 @@
+# coding in style
+theme = tokyonight
+background = #07070a
+background-opacity = 0.9
+background-blur-radius = 20
+
+# my eyes!
+font-size = 16
+
+# optional: bonus meta key
+macos-option-as-alt = false
+
+#  keybindings
+keybind = super+shift+j=previous_tab
+keybind = super+shift+k=next_tab
