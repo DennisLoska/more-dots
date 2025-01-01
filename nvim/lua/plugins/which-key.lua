@@ -130,7 +130,7 @@ return {
 				},
 				-- { "<leader>tt", ":", desc = "Command" },
 				{
-					"<leader>tm",
+					"<leader>tc",
 					function()
 						vim.cmd("!ripper-tags -R --exclude=vendor")
 						vim.notify = require("notify")
@@ -199,6 +199,7 @@ return {
 				{ "<leader>fb", ":Telescope buffers<CR>", desc = "Search Buffers" },
 				{ "<leader>fd", ":Telescope diagnostics<CR>", desc = "Search Diagnostics" },
 				{ "<leader>fh", ":Telescope help_tags<CR>", desc = "Search Help" },
+				{ "<leader>fc", ":Telescope find_files cwd=~/.config/nvim<CR>", desc = "Search Config" },
 				{ "<leader>fe", ":Neotree toggle<CR>", desc = "Toggle Filetree" },
 			}, { mode = "n" })
 
