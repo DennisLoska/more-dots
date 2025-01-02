@@ -205,13 +205,17 @@ return {
 				{ "<leader>b", group = "Buffers" },
 				{ "<leader>bd", ":bdelete<CR>", desc = "Delete Buffer" },
 				{ "<leader>ba", ":%bd|e#<CR>", desc = "Delete All" },
+				{ "<leader>bn", ":let @+ = expand('%:t')<CR>", desc = "Copy Name" },
+				{ "<leader>bp", ":let @+ = expand('%:p:~')<CR>", desc = "Copy Path" },
 			}, { mode = "n" })
 
 			-- Thanks Teej
 			wk.add({
 				{ "<leader>f", group = "Find" },
-				{ "<leader>fa", ":Telescope AST_grep<CR>", desc = "Search w. AST" },
+				{ "<leader>fe", ":Neotree toggle<CR>", desc = "Toggle Filetree" },
+				{ "<leader>ff", ":Oil<CR>", desc = "File Explorer" },
 				-- { "<leader>fl", ":Telescope live_grep<CR>", desc = "Search Grep" },
+				-- { "<leader>ff", ":Telescope find_files<CR>", desc = "Search Files" },
 				{
 					"<leader>fw",
 					require("telescope-live-grep-args.shortcuts").grep_word_under_cursor,
@@ -222,7 +226,6 @@ return {
 					":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
 					desc = "Search Grep With Args",
 				},
-				{ "<leader>ff", ":Telescope find_files<CR>", desc = "Search Files" },
 				{ "<leader>fb", ":Telescope buffers<CR>", desc = "Search Buffers" },
 				{ "<leader>fd", ":Telescope diagnostics<CR>", desc = "Search Diagnostics" },
 				{ "<leader>fh", ":Telescope help_tags<CR>", desc = "Search Help" },
@@ -230,6 +233,7 @@ return {
 				{ "<leader>fs", ":Telescope git_status<CR>", desc = "Search Git Status" },
 				{ "<leader>fr", ":Telescope oldfiles<CR>", desc = "Search Recents" },
 				{ "<leader>fc", ":Telescope find_files cwd=~/.config/nvim<CR>", desc = "Search Config" },
+				{ "<leader>fa", ":Telescope AST_grep<CR>", desc = "Search w. AST" },
 				{
 					"<leader>fp",
 					":Telescope find_files cwd=~/projects/doctolib/engines/phone_assistant<CR>",
@@ -240,7 +244,7 @@ return {
 					":Telescope find_files cwd=~/projects/doctolib/packages/@doctolib/phone-assistant<CR>",
 					desc = "Search Phone Assistant Frontend",
 				},
-				{ "<leader>fe", ":Neotree toggle<CR>", desc = "Toggle Filetree" },
+				{ "<leader>f-", require("dropbar.api").pick, desc = "Pick Breadcrumb" },
 			}, { mode = "n" })
 
 			-- Code interactions
@@ -253,8 +257,24 @@ return {
 			wk.add({
 				{ "<leader>g", group = "Git" },
 				{ "<leader>gg", "<CMD>LazyGit<cr>", desc = "LazyGit" },
+				{
+					"<leader>gb",
+					function()
+						require("gitsigns").blame_line({ full = true })
+					end,
+					desc = "Git Blame",
+				},
+				{
+					"<leader>gd",
+					function()
+						require("gitsigns").diffthis("~")
+					end,
+					desc = "Git Diff",
+				},
+				{ "<leader>gr", require("gitsigns").reset_buffer, desc = "Git Reset" },
 			}, { mode = "n" })
 
+			-- map("n", "<leader>ghd", , "Diff This")
 			-- Makes the LSP popups appear two seconds after not moving cursor
 			-- in combination with the CursorHold options blow!
 			vim.o.updatetime = 2000

@@ -1,5 +1,7 @@
 require("config.lazy")
 require("bufferline").setup({})
+require("mini.surround").setup()
+require("oil").setup()
 
 local theme = require("lualine.themes.tokyonight")
 theme.normal.c.bg = "None"
@@ -94,3 +96,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 vim.cmd([[colorscheme tokyonight]])
+
+-- - trouble
+-- - neotree jump to open buffer
+-- - tmux ctrl-r remap
+-- - dropbar
+-- - oil
