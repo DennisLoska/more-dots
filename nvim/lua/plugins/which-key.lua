@@ -15,7 +15,7 @@ return {
 			vim.api.nvim_set_keymap("i", "ü", "(", { noremap = false, silent = true })
 			vim.api.nvim_set_keymap("i", "Ü", ")", { noremap = true, silent = true })
 
-			-- Bye have a great time
+			-- Bye have a great time!
 			vim.keymap.set("n", "<leader>qq", ":Neotree close<CR> :qa<CR>", { desc = "Exit" })
 
 			-- Navigating by buffer
@@ -29,6 +29,13 @@ return {
 			-- Lazy
 			vim.keymap.set("n", "<leader>l", ":Lazy<CR>", { desc = "Find file" })
 
+			-- Better Quick List
+			vim.keymap.set("n", "<C-n>", ":cnext<CR>")
+			vim.keymap.set("n", "<C-p>", ":cprev<CR>")
+			vim.keymap.set("n", "-", ":cdo :%s//cg")
+
+			-- Glorious Undo
+			vim.keymap.set("n", "<leader>u", "<CMD>lua require('undotree').toggle()<CR>")
 			-- Remap jk to <Esc> - This is so good!
 			vim.api.nvim_set_keymap("i", "jk", "<Esc>", { noremap = true, silent = true })
 
@@ -85,6 +92,16 @@ return {
 
 			-- Better Save
 			vim.keymap.set("n", "<C-s>", ":w<CR>")
+
+			-- Harpoon the Moon!
+			vim.keymap.set("n", "<leader>A", function()
+				require("harpoon"):list():append()
+			end, { desc = "Harpoon Buffer" })
+
+			vim.keymap.set("n", "<leader>a", function()
+				local harpoon = require("harpoon")
+				harpoon.ui:toggle_quick_menu(harpoon:list())
+			end, { desc = "Harpoon Bookmarks" })
 
 			-- Better marks
 			-- vim.api.nvim_set_keymap("n", "<C-m>", "'", { noremap = false, silent = true })
@@ -194,18 +211,48 @@ return {
 			wk.add({
 				{ "<leader>f", group = "Find" },
 				{ "<leader>fa", ":Telescope AST_grep<CR>", desc = "Search w. AST" },
-				{ "<leader>fl", ":Telescope live_grep<CR>", desc = "Search Grep" },
+				-- { "<leader>fl", ":Telescope live_grep<CR>", desc = "Search Grep" },
+				{
+					"<leader>fw",
+					require("telescope-live-grep-args.shortcuts").grep_word_under_cursor,
+					desc = "Search Current Word",
+				},
+				{
+					"<leader>fl",
+					":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
+					desc = "Search Grep With Args",
+				},
 				{ "<leader>ff", ":Telescope find_files<CR>", desc = "Search Files" },
 				{ "<leader>fb", ":Telescope buffers<CR>", desc = "Search Buffers" },
 				{ "<leader>fd", ":Telescope diagnostics<CR>", desc = "Search Diagnostics" },
 				{ "<leader>fh", ":Telescope help_tags<CR>", desc = "Search Help" },
+				{ "<leader>fg", ":Telescope git_files<CR>", desc = "Search Git Repository" },
+				{ "<leader>fs", ":Telescope git_status<CR>", desc = "Search Git Status" },
+				{ "<leader>fr", ":Telescope oldfiles<CR>", desc = "Search Recents" },
 				{ "<leader>fc", ":Telescope find_files cwd=~/.config/nvim<CR>", desc = "Search Config" },
+				{
+					"<leader>fp",
+					":Telescope find_files cwd=~/projects/doctolib/engines/phone_assistant<CR>",
+					desc = "Search Phone Assistant Engine",
+				},
+				{
+					"<leader>fo",
+					":Telescope find_files cwd=~/projects/doctolib/packages/@doctolib/phone-assistant<CR>",
+					desc = "Search Phone Assistant Frontend",
+				},
 				{ "<leader>fe", ":Neotree toggle<CR>", desc = "Toggle Filetree" },
 			}, { mode = "n" })
 
+			-- Code interactions
 			wk.add({
 				{ "<leader>c", group = "Code Actions" },
 				{ "<leader>cm", ":Mason <CR>", desc = "Mason" },
+			}, { mode = "n" })
+
+			-- Git stuff
+			wk.add({
+				{ "<leader>g", group = "Git" },
+				{ "<leader>gg", "<CMD>LazyGit<cr>", desc = "LazyGit" },
 			}, { mode = "n" })
 
 			-- Makes the LSP popups appear two seconds after not moving cursor
