@@ -36,7 +36,7 @@ return {
 									return client.name == "null-ls"
 								end,
 								bufnr = bufnr,
-								formatting_options = { tabSize = 4, insertSpaces = true },
+								formatting_options = { tabSize = 2, insertSpaces = true },
 							})
 						end,
 					})
