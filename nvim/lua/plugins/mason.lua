@@ -19,6 +19,7 @@ return {
 				"denols",
 				-- "ts_ls",
 				"eslint",
+				"ts_ls",
 				"golangci_lint_ls",
 				"gopls",
 				"templ",
@@ -34,7 +35,6 @@ return {
 
 		mason_tool_installer.setup({
 			ensure_installed = {
-				"prettier",
 				"prettierd",
 				"rubocop",
 				"stylua",

@@ -76,7 +76,7 @@ return {
 		end
 
 		-- configure typescript server
-		lspconfig["denols"].setup({
+		lspconfig["ts_ls"].setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})

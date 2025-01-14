@@ -15,7 +15,8 @@ return {
 		null_ls.setup({
 			root_dir = null_ls_utils.root_pattern(".null-ls-root", "Makefile", ".git", "package.json"),
 			sources = {
-				formatting.prettier.with({
+				-- formatting.biome,
+				formatting.prettierd.with({
 					disabled_filetypes = {
 						"markdown",
 						"md",

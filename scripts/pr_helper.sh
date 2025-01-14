@@ -54,13 +54,9 @@ select TYPE in "${TYPES[@]}"; do
 	esac
 done
 
-echo ""
-echo "Using '$TYPE' as PR type.."
-echo "Using latest commit message for the PR title..."
-
 # Latest commit has to include ":" character!
 # replace entire commit message until first ":"
-TITLE=$(echo $LAST_COMMIT | sed "s/^.*:/$TYPES($BRANCH):/")
+TITLE=$(echo $LAST_COMMIT | sed "s/^.*:/$TYPE($BRANCH):/")
 echo "PR title: $TITLE"
 echo ""
 
