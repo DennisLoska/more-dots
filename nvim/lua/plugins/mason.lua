@@ -25,6 +25,7 @@ return {
 				"rubocop",
 				"solargraph",
 				"ruby_lsp",
+				"bashls",
 				"yamlls",
 				"terraformls",
 			},
@@ -34,8 +35,11 @@ return {
 		mason_tool_installer.setup({
 			ensure_installed = {
 				"prettier",
-				"stylua",
 				"prettierd",
+				"rubocop",
+				"stylua",
+				"shellcheck",
+				"shfmt",
 			},
 		})
 	end,

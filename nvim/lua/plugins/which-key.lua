@@ -240,6 +240,11 @@ return {
 					desc = "Search Phone Assistant Engine",
 				},
 				{
+					"<leader>fm",
+					":Telescope find_files cwd=~/projects/doctolib/engines/patient_messaging_pro<CR>",
+					desc = "Search Patient Messaging Pro",
+				},
+				{
 					"<leader>fo",
 					":Telescope find_files cwd=~/projects/doctolib/packages/@doctolib/phone-assistant<CR>",
 					desc = "Search Phone Assistant Frontend",
@@ -272,6 +277,12 @@ return {
 					desc = "Git Diff",
 				},
 				{ "<leader>gr", require("gitsigns").reset_buffer, desc = "Git Reset" },
+			}, { mode = "n" })
+
+			-- Ruby Utils
+			wk.add({
+				{ "<leader>r", group = "Ruby Utils" },
+				-- { "<leader>rt", TODOD, desc = "Rails Tests" },
 			}, { mode = "n" })
 
 			-- map("n", "<leader>ghd", , "Diff This")

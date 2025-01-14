@@ -8,19 +8,22 @@ return {
 		local null_ls_utils = require("null-ls.utils")
 		local formatting = null_ls.builtins.formatting
 		local diagnostics = null_ls.builtins.diagnostics
+
 		-- to setup format on save
 		local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
 		null_ls.setup({
 			root_dir = null_ls_utils.root_pattern(".null-ls-root", "Makefile", ".git", "package.json"),
 			sources = {
-				formatting.prettierd.with({
+				formatting.prettier.with({
 					disabled_filetypes = {
 						"markdown",
 						"md",
 					},
 				}),
 				formatting.stylua,
+				formatting.rubocop,
+				formatting.shfmt,
 			},
 			-- configure format on save
 			on_attach = function(current_client, bufnr)

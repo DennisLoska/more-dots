@@ -15,11 +15,11 @@ return {
 		priority = 1000,
 		opts = {
 			style = "night", -- other: 'storm', 'night', 'day', "moon"
-			transparent = true,
-			styles = {
-				sidebars = "transparent",
-				floats = "transparent",
-			},
+			-- transparent = true,
+			-- styles = {
+			-- 	sidebars = "transparent",
+			-- 	floats = "transparent",
+			-- },
 		},
 	},
 }

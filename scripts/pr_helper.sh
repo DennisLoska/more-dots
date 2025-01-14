@@ -63,7 +63,32 @@ echo "Using latest commit message for the PR title..."
 # Latest commit has to include ":" character!
 # replace entire commit message until first ":"
 TITLE=$(echo $LAST_COMMIT | sed "s/^.*:/$TYPES($BRANCH):/")
+echo "PR title: $TITLE"
+echo ""
 
+
+PS3="Adjust PR title? (1-2): "
+ADJUST=("yes" "no")
+
+select ADJ in "${ADJUST[@]}" 
+do
+    case $ADJ in
+        "yes")
+            echo "$TITLE" > /tmp/pr_title
+            echo "this is it $(cat /tmp/pr_title)"
+            vim -c 'startinsert' /tmp/pr_title
+            TITLE=$(cat /tmp/pr_title)
+            rm /tmp/pr_title
+            break
+            ;;
+        "no")
+            break
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
+echo "PR title: $TITLE"
 echo ""
 echo "Provide a PR description - Hint: \"<esc>:wq\" to exit Vim :D"
 echo ""

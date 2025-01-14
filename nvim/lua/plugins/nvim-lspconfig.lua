@@ -100,7 +100,18 @@ return {
 		})
 
 		-- configure ruby server
+		lspconfig["ruby_lsp"].setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
 		lspconfig["solargraph"].setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		-- configure rubocop server
+		lspconfig["rubocop"].setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
@@ -113,6 +124,12 @@ return {
 
 		-- configure go lint server
 		lspconfig["golangci_lint_ls"].setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		-- configure bash server
+		lspconfig["bashls"].setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
