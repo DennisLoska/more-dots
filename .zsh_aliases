@@ -1,0 +1,57 @@
+alias \
+  cp="cp -iv" \
+  mv="mv -iv" \
+  rm="rm -v" \
+  mkd="mkdir -pv" \
+  c="clear" \
+  e="exit" \
+  k="kubectl" \
+  yt="yt-dlp --cookies ../cookie.txt --download-archive download.txt --no-post-overwrites -ciwx --audio-format mp3 --output '%(title)s.%(ext)s' --yes-playlist" \
+  gs="git status" \
+  gp="git pull" \
+  gl="git log --decorate --oneline --graph" \
+  glp='git log --pretty=format:"%s" -n 50' \
+  gb="git branch" \
+  prs="gh pr list --web" \
+  pr="~/scripts/pr_helper.sh" \
+  prv="~/scripts/pr_viewer.sh" \
+  pretty="npx -y prettier@3.1.0 --write ." \
+  d="cd /Users/\$USER/work" \
+  up="brew update && brew outdated && brew upgrade" \
+  a="cd /Users/\$USER/work/aaron.ai" \
+  p="cd /Users/\$USER/work/aaron.ai/product_core" \
+  flow="cd /Users/\$USER/work/aaron.ai/phone-assistant-flow-engine" \
+  h="cd ~" \
+  neo="cd ~/.config/nvim" \
+  src="source ~/.zshrc" \
+  brails="bin/rails" \
+  doc="cd /Users/\$USER/projects/doctolib" \
+  docdocker="doc && colima start --cpu 4 --memory 8 && bin/dev docker" \
+  docfront="doc && bin/dev webpack" \
+  docvite="doc && bin/dev vite" \
+  docback="doc && bin/rails server" \
+  docwork="doc && bin/dev worker" \
+  migrane="doc && git pull && bundle install && npm install && bin/rails db:migrate" \
+  nuke="doc && git pull && bundle install && npm install && bin/rails db:reset" \
+  monolith="cd ~ && ./tmux_scripts/tmux_monolith.sh" \
+  pass="doc && bin/rails test engines/phone_assistant" \
+  system="cd ~ && ./tmux_scripts/tmux_system.sh" \
+  config="cd ~ && ./tmux_scripts/tmux_config.sh" \
+  core="cd ~ && ./tmux_scripts/tmux_core.sh" \
+  aaron="cd ~ && ./tmux_scripts/tmux_aaron.sh" \
+  all="cd ~ && ./tmux_scripts/tmux_all.sh" \
+  sca="cd ~ && ./tmux_scripts/tmux_sca.sh" \
+  doctolib="cd ~ && ./tmux_scripts/tmux_doctolib.sh" \
+  aaron-core="colima start --cpu 4 --memory 8  && a && cd product_core/local_dev && ./start.sh" \
+  swa="a && cd product_core/smart_web_assistant && npm run dev" \
+  swa-int="a && cd product_core/smart_web_assistant && npm run build && aws s3 sync ./build/ s3://aaron-swa-int --delete" \
+  swa-int="a && cd product_core/smart_web_assistant && npm run build && aws s3 sync ./build/ s3://aaron-swa-int --delete" \
+  swa-prod="a && cd product_core/smart_web_assistant && npm run build && aws s3 sync ./build/ s3://aaron-swa-prod --delete" \
+  start-pg="brew services run postgresql@16" \
+  stop-pg="brew services stop postgresql@16" \
+  plow="cd ~ && ./tmux_scripts/tmux_garden.sh"
+
+# Colorize commands when possible.
+alias \
+  ls="ls --color=auto" \
+  grep="grep --color=auto"
