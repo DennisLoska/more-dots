@@ -5,7 +5,6 @@ alias \
   mkd="mkdir -pv" \
   c="clear" \
   e="exit" \
-  k="kubectl" \
   yt="yt-dlp --cookies ../cookie.txt --download-archive download.txt --no-post-overwrites -ciwx --audio-format mp3 --output '%(title)s.%(ext)s' --yes-playlist" \
   gs="git status" \
   gp="git pull" \
@@ -16,16 +15,17 @@ alias \
   pr="~/scripts/pr_helper.sh" \
   prv="~/scripts/pr_viewer.sh" \
   pretty="npx -y prettier@3.1.0 --write ." \
-  d="cd /Users/\$USER/work" \
+  d="cd ~/work" \
   up="brew update && brew outdated && brew upgrade" \
-  a="cd /Users/\$USER/work/aaron.ai" \
-  p="cd /Users/\$USER/work/aaron.ai/product_core" \
-  flow="cd /Users/\$USER/work/aaron.ai/phone-assistant-flow-engine" \
+  uup="sudo apt-get update && sudo apt-get upgrade -y" \
+  a="cd ~/work/aaron.ai" \
+  p="cd ~/work/aaron.ai/product_core" \
+  flow="cd ~/work/aaron.ai/phone-assistant-flow-engine" \
   h="cd ~" \
   neo="cd ~/.config/nvim" \
   src="source ~/.zshrc" \
   brails="bin/rails" \
-  doc="cd /Users/\$USER/projects/doctolib" \
+  doc="cd ~/projects/doctolib" \
   docdocker="doc && colima start --cpu 4 --memory 8 && bin/dev docker" \
   docfront="doc && bin/dev webpack" \
   docvite="doc && bin/dev vite" \
@@ -43,13 +43,9 @@ alias \
   sca="cd ~ && ./tmux_scripts/tmux_sca.sh" \
   doctolib="cd ~ && ./tmux_scripts/tmux_doctolib.sh" \
   aaron-core="colima start --cpu 4 --memory 8  && a && cd product_core/local_dev && ./start.sh" \
-  swa="a && cd product_core/smart_web_assistant && npm run dev" \
-  swa-int="a && cd product_core/smart_web_assistant && npm run build && aws s3 sync ./build/ s3://aaron-swa-int --delete" \
-  swa-int="a && cd product_core/smart_web_assistant && npm run build && aws s3 sync ./build/ s3://aaron-swa-int --delete" \
-  swa-prod="a && cd product_core/smart_web_assistant && npm run build && aws s3 sync ./build/ s3://aaron-swa-prod --delete" \
   start-pg="brew services run postgresql@16" \
   stop-pg="brew services stop postgresql@16" \
-  plow="cd ~ && ./tmux_scripts/tmux_garden.sh"
+  plow="cd ~ && ./scripts/tmux_garden.sh"
 
 # Colorize commands when possible.
 alias \
