@@ -75,6 +75,8 @@ return {
 			vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
 		end
 
+		print(vim.inspect(capabilities))
+
 		-- configure typescript server
 		lspconfig["ts_ls"].setup({
 			capabilities = capabilities,
@@ -134,8 +136,14 @@ return {
 			on_attach = on_attach,
 		})
 
-		-- configure bash server
-		lspconfig["clangd"].setup({
+		-- configure python server
+		lspconfig["pyright"].setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		-- configure python server
+		lspconfig["terraformls"].setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})

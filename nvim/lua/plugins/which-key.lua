@@ -16,11 +16,14 @@ return {
 			vim.api.nvim_set_keymap("i", "Ü", ")", { noremap = true, silent = true })
 
 			-- Bye have a great time!
-			vim.keymap.set("n", "<leader>qq", ":Neotree close<CR> :qa<CR>", { desc = "Exit" })
+			vim.keymap.set("n", "<leader>qq", ":qa<CR>", { desc = "Exit" })
 
 			-- Navigating by buffer
 			vim.keymap.set("n", "L", ":bnext<CR>", { desc = "Next Buffer" })
 			vim.keymap.set("n", "H", ":bprev<CR>", { desc = "Prev. Buffer" })
+
+			-- Jump files
+			vim.keymap.set("n", "<C-y>", "<C-^>")
 
 			-- File explorer
 			vim.keymap.set("n", "<leader>e", vim.cmd.Ex, { desc = "File Explorer" })
@@ -214,6 +217,7 @@ return {
 				{ "<leader>f", group = "Find" },
 				{ "<leader>fe", ":Neotree toggle<CR>", desc = "Toggle Filetree" },
 				{ "<leader>ff", ":Oil<CR>", desc = "File Explorer" },
+				{ "<leader>fq", ":Oil ~/work/<CR>", desc = "Search Projects" },
 				-- { "<leader>fl", ":Telescope live_grep<CR>", desc = "Search Grep" },
 				-- { "<leader>ff", ":Telescope find_files<CR>", desc = "Search Files" },
 				{
@@ -249,7 +253,6 @@ return {
 					":Telescope find_files cwd=~/projects/doctolib/packages/@doctolib/phone-assistant<CR>",
 					desc = "Search Phone Assistant Frontend",
 				},
-				{ "<leader>f-", require("dropbar.api").pick, desc = "Pick Breadcrumb" },
 			}, { mode = "n" })
 
 			-- Code interactions

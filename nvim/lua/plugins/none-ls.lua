@@ -23,9 +23,12 @@ return {
 					},
 				}),
 				formatting.stylua,
-				formatting.rubocop,
 				formatting.shfmt,
-				formatting.clang_format,
+				formatting.black,
+				formatting.rubocop,
+				formatting.erb_format,
+				formatting.erb_lint,
+				formatting.terraform_fmt,
 			},
 			-- configure format on save
 			on_attach = function(current_client, bufnr)

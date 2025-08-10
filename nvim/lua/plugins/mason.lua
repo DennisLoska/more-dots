@@ -14,12 +14,10 @@ return {
 		mason_lspconfig.setup({
 			ensure_installed = {
 				"lua_ls",
+				"ts_ls",
 				"html",
 				"cssls",
-				"denols",
-				-- "ts_ls",
 				"eslint",
-				"ts_ls",
 				"golangci_lint_ls",
 				"gopls",
 				"templ",
@@ -31,6 +29,7 @@ return {
 				"terraformls",
 			},
 			automatic_installation = true,
+			automatic_enable = false,
 		})
 
 		mason_tool_installer.setup({
