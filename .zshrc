@@ -3,13 +3,43 @@ if [ -f ~/.zsh_aliases ]; then
   . ~/.zsh_aliases
 fi
 
-# brew
-export HOMEBREW_NO_ANALYTICS=1
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# amazing ssh
+eval $(ssh-agent -s)
+ssh-add ~/.ssh/flux
 
-# asdf
-source $HOME/.asdf/asdf.sh
+# path variables 
+if [ -d "$HOME/bin" ]; then
+	PATH="$HOME/bin:$PATH"
+fi
 
-# spaceship
-SPACESHIP_PROMPT_PREFIXES_SHOW="false"
-source "/opt/homebrew/opt/spaceship/spaceship.zsh"
+if [ -d "$HOME/.local/bin" ]; then
+	PATH="$HOME/.local/bin:$PATH"
+fi
+
+# go
+export GOPATH=$HOME/go
+export GOBIN=$GOPATH/bin
+export PATH=$PATH:$GOBIN
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Noji settings
+export NOJI_CONFIG_HOME="$HOME/.config"
+export EDITOR="nvim"
+
+# Zoxide
+eval "$(zoxide init zsh)"
+
+# emacs mode
+bindkey -e
+
+# starship
+eval "$(starship init zsh)"
+
+# mise
+eval "$(mise activate zsh)"
+
+# CUDA CUDA CUDA
+export CUDA_VISIBLE_DEVICES=0
