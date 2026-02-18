@@ -1,0 +1,26 @@
+# Lives in: /etc/default/limine
+TARGET_OS_NAME="Omarchy"
+
+ESP_PATH="/boot"
+
+KERNEL_CMDLINE[default]="cryptdevice=PARTUUID=9a9c90b5-d4a8-47e0-ab83-a09538250d77:root root=/dev/mapper/root zswap.enabled=0 rootflags=subvol=@ rw rootfstype=btrfs"
+KERNEL_CMDLINE[default]+="quiet splash"
+KERNEL_CMDLINE[default]+="pci=realloc pcie_port_pm=off nvidia_drm.modeset=1 nvidia.NVreg_EnableResizableBar=1 nvidia.NVreg_OpenRmEnableUnsupportedGpus=1 nvidia.NVreg_DynamicPowerManagement=0"
+KERNEL_CMDLINE[default]+="hpbussize=0x33 hpmmioprefsize=34G hpmmiosize=512M"
+MODULES=(thunderbolt nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+
+# KERNEL_CMDLINE[default]+="pcie_ports=native pcie_aspm=off amd_iommu=pt iommu=pt"
+
+ENABLE_UKI=yes
+CUSTOM_UKI_NAME="omarchy"
+
+ENABLE_LIMINE_FALLBACK=yes
+
+# Find and add other bootloaders
+FIND_BOOTLOADERS=yes
+
+BOOT_ORDER="*, *fallback, Snapshots"
+
+MAX_SNAPSHOT_ENTRIES=5
+
+SNAPSHOT_FORMAT_CHOICE=6
