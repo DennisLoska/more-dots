@@ -288,6 +288,13 @@ return {
 				-- { "<leader>rt", TODOD, desc = "Rails Tests" },
 			}, { mode = "n" })
 
+			-- Jira
+			wk.add({
+				{ "<leader>j", group = "Jira" },
+				{ "<leader>je", "<CMD>JiraEpic<cr>", desc = "Jira Epic" },
+				{ "<leader>ji", "<CMD>JiraIssues<cr>", desc = "Jira Issues" },
+			}, { mode = "n" })
+
 			-- map("n", "<leader>ghd", , "Diff This")
 			-- Makes the LSP popups appear two seconds after not moving cursor
 			-- in combination with the CursorHold options blow!

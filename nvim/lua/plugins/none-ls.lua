@@ -1,6 +1,11 @@
+-- DEPRECATED: none-ls/null-ls is in maintenance mode and many sources have been removed
+-- Replaced by conform.nvim for formatting
+-- Keeping this file disabled for reference
+
 return {
 	"nvimtools/none-ls.nvim",
-	lazy = true,
+	enabled = false, -- DISABLED: Use conform.nvim instead
+	lazy = false,
 	event = { "BufReadPre", "BufNewFile" },
 	dependencies = { "nvim-lua/plenary.nvim" },
 	config = function()

@@ -9,7 +9,15 @@ return {
 		local mason_lspconfig = require("mason-lspconfig")
 		local mason_tool_installer = require("mason-tool-installer")
 
-		mason.setup({})
+		mason.setup({
+			ui = {
+				icons = {
+					package_installed = "✓",
+					package_pending = "➜",
+					package_uninstalled = "✗",
+				},
+			},
+		})
 
 		mason_lspconfig.setup({
 			ensure_installed = {
@@ -27,6 +35,7 @@ return {
 				"bashls",
 				"yamlls",
 				"terraformls",
+				"pyright",
 			},
 			automatic_installation = true,
 			automatic_enable = false,
@@ -34,12 +43,20 @@ return {
 
 		mason_tool_installer.setup({
 			ensure_installed = {
+				-- Formatters (used by conform.nvim)
 				"prettierd",
-				"rubocop",
+				"prettier",
 				"stylua",
-				"shellcheck",
 				"shfmt",
+				"black",
+				"gofumpt",
+				"goimports",
+				"erb-formatter",
+				-- Linters
+				"shellcheck",
 			},
+			auto_update = false,
+			run_on_start = true,
 		})
 	end,
 }
