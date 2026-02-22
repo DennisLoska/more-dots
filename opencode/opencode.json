@@ -15,6 +15,7 @@
     "lsp": "allow",
     "bash": {
       "*": "ask",
+      "rtk": "allow",
       "echo *": "allow",
       "fd *": "allow",
       "find *": "allow",
