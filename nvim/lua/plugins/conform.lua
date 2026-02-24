@@ -58,6 +58,39 @@ return {
 			}
 		end,
 		formatters = {
+			prettier = {
+				-- Use local node_modules prettier if available and supports --stdin-filepath (v3).
+				-- Prettier v4 alpha removed stdin support, so we must detect and skip it.
+				-- Falls back to mason's prettier (v3) which always works.
+				command = function(self, ctx)
+					local util = require("conform.util")
+					local resolve = util.from_node_modules("prettier")
+					local cmd = resolve(self, ctx)
+					-- If resolve returned bare "prettier" (no local found), use mason
+					if cmd == "prettier" then
+						return vim.fn.expand("~/.local/share/nvim/mason/bin/prettier")
+					end
+					-- Local binary found — check if v4+ (no stdin support)
+					-- Cache per path so we only shell out once per nvim session
+					vim.g._prettier_v4_cache = vim.g._prettier_v4_cache or {}
+					local cache = vim.g._prettier_v4_cache
+					if cache[cmd] == nil then
+						local ok, obj = pcall(vim.system, { cmd, "--version" }, { text = true })
+						if ok then
+							local result = obj:wait()
+							local major = tonumber((result.stdout or ""):match("^(%d+)"))
+							cache[cmd] = (major or 0) >= 4
+						else
+							cache[cmd] = false
+						end
+						vim.g._prettier_v4_cache = cache
+					end
+					if cache[cmd] then
+						return vim.fn.expand("~/.local/share/nvim/mason/bin/prettier")
+					end
+					return cmd
+				end,
+			},
 			shfmt = {
 				prepend_args = { "-i", "2" },
 			},
