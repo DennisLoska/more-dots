@@ -41,6 +41,9 @@ return {
 			callback = set_hl_for_floating_window,
 		})
 
+		-- Remap to S-k instead
+		vim.keymap.del("n", "<C-k>")
+
 		local on_attach = function(client, bufnr)
 			local opts = function(desc)
 				return { buffer = bufnr, desc = desc }
@@ -58,7 +61,7 @@ return {
 			vim.keymap.set("n", "<leader>D", vim.lsp.buf.type_definition, opts("Go to type definition"))
 			vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts("Go to previous diagnostic"))
 			vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts("Go to next diagnostic"))
-			vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts("Signature help"))
+			vim.keymap.set("n", "<S-k>", vim.lsp.buf.signature_help, opts("Signature help"))
 		end
 
 		local capabilities = cmp_nvim_lsp.default_capabilities()
