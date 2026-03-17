@@ -33,7 +33,7 @@ return {
 			sh = { "shfmt" },
 			bash = { "shfmt" },
 			zsh = { "shfmt" },
-			ruby = { "rubocop" },
+			ruby = { "stree", "rubocop" },
 			eruby = { "erb_format" },
 			terraform = { "terraform_fmt" },
 			tf = { "terraform_fmt" },
@@ -93,6 +93,16 @@ return {
 			},
 			shfmt = {
 				prepend_args = { "-i", "2" },
+			},
+			stree = {
+				command = "bundle",
+				args = { "exec", "stree", "write", "$FILENAME" },
+				stdin = false,
+			},
+			rubocop = {
+				command = "bundle",
+				args = { "exec", "rubocop", "--autocorrect-all", "--stderr", "--stdin", "$FILENAME" },
+				stdin = true,
 			},
 		},
 	},

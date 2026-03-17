@@ -127,10 +127,18 @@ return {
 			on_attach = on_attach,
 		})
 
+		-- Configure stree
+		lspconfig["stree"].setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+			cmd = { "bundle", "exec", "stree", "lsp" },
+		})
+
 		-- Configure Rubocop server
 		lspconfig["rubocop"].setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
+			cmd = { "bundle", "exec", "rubocop", "--lsp" },
 		})
 
 		-- Configure Go server
