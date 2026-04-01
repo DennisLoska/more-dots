@@ -253,6 +253,41 @@ return {
 					":Telescope find_files cwd=~/projects/doctolib/packages/@doctolib/phone-assistant<CR>",
 					desc = "Search Phone Assistant Frontend",
 				},
+				{
+					"<leader>fi",
+					function()
+						vim.fn.system("git rev-parse --verify master 2>/dev/null")
+						local base_branch = vim.v.shell_error == 0 and "master" or "main"
+						local merge_base =
+							vim.fn.system("git merge-base HEAD " .. base_branch .. " 2>/dev/null"):gsub("\n", "")
+
+						if merge_base == "" then
+							vim.notify("Could not find merge base with " .. base_branch, vim.log.levels.WARN)
+							return
+						end
+
+						local diff_output = vim.fn.system("git diff --name-only " .. merge_base)
+						local files = {}
+						for file in diff_output:gmatch("[^\n]+") do
+							table.insert(files, file)
+						end
+
+						if #files == 0 then
+							vim.notify("No changed files in diff against " .. base_branch, vim.log.levels.INFO)
+							return
+						end
+
+						require("telescope.pickers")
+							.new({}, {
+								prompt_title = "Diff files vs " .. base_branch .. " (" .. #files .. ")",
+								finder = require("telescope.finders").new_table({ results = files }),
+								previewer = require("telescope.config").values.file_previewer({}),
+								sorter = require("telescope.config").values.generic_sorter({}),
+							})
+							:find()
+					end,
+					desc = "Search Diff Files (vs main/master)",
+				},
 			}, { mode = "n" })
 
 			-- Code interactions
