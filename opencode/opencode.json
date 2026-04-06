@@ -42,7 +42,7 @@
       "git commit *": "deny",
       "git clean *": "deny",
       "git reset *": "deny",
-      "git restore *": "deny"
+      "git restore *": "deny",
       "gh *": "allow",
       "gh *delete*": "deny",
       "gh *DELETE*": "deny",
@@ -74,13 +74,13 @@
       "mkdir *": "allow",
       "touch *": "allow",
       "rm *": "deny",
-      "rm -rf*": "deny",
+      "rm -rf*": "deny"
     },
     "external_directory": {
       "~/work/**": "allow",
       "/tmp/**": "allow"
     },
-    "doom_loop": "ask",
+    "doom_loop": "ask"
   },
   "provider": {
     "lmstudio": {
