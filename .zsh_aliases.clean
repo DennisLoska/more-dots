@@ -1,0 +1,29 @@
+alias \
+  cp="cp -iv" \
+  mv="mv -iv" \
+  rm="rm -v" \
+  mkd="mkdir -pv" \
+  c="clear" \
+  e="exit" \
+  yt="yt-dlp --cookies ../cookie.txt --download-archive download.txt --no-post-overwrites -ciwx --audio-format mp3 --output '%(title)s.%(ext)s' --yes-playlist" \
+  gs="git status" \
+  gp="git pull" \
+  gl="git log --decorate --oneline --graph" \
+  glp='git log --pretty=format:"%s" -n 50' \
+  gb="git branch" \
+  prs="gh pr list --web" \
+  pr="~/scripts/pr_helper.sh" \
+  prv="~/scripts/pr_viewer.sh" \
+  pretty="npx -y prettier@3.1.0 --write ." \
+  d="cd ~/work" \
+  h="cd ~" \
+  neo="cd ~/.config/nvim" \
+  src="source ~/.zshrc" \
+  system="cd ~ && ./tmux_scripts/tmux_system.sh" \
+  config="cd ~ && ./tmux_scripts/tmux_config.sh" \
+  aaron="cd ~ && ./tmux_scripts/tmux_aaron.sh" \
+  plow="cd ~ && ./scripts/tmux_garden.sh"
+
+alias \
+  ls="ls --color=auto" \
+  grep="grep --color=auto"
