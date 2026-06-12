@@ -1,6 +1,38 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["rtk"],
+  "plugin": ["opencode-mem", "cc-safety-net", "./plugins/caveman/plugin.js", "opencode-power-pack@git+https://github.com/waybarrios/opencode-power-pack.git"],
+  "instructions": ["~/.claude/CLAUDE.md", "AGENTS.md"],
+  "mcp": {
+    "dust": {
+      "type": "remote",
+      "url": "http://localhost:7777/sse",
+      "enabled": true
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "atlassian": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "mcp-remote",
+        "https://mcp.atlassian.com/v1/sse"
+      ],
+      "enabled": true
+    },
+    "caveman-shrink": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "caveman-shrink"
+      ],
+      "enabled": true
+    }
+  },
   "permission": {
     "question": "deny",
     "read": {
@@ -25,8 +57,6 @@
       "printenv": "deny",
       "sudo *": "deny",
       "curl *": "allow",
-      "rtk *": "allow",
-      "openspec *": "allow",
       "which *": "allow",
       "echo *": "allow",
       "fd *": "allow",
@@ -67,8 +97,6 @@
       "timeout *": "allow",
       "lsof *": "allow",
       "wc *": "allow",
-      "head *": "allow",
-      "tail *": "allow",
       "python *": "allow",
       "go *": "allow",
       "mkdir *": "allow",
@@ -78,6 +106,7 @@
     },
     "external_directory": {
       "~/work/**": "allow",
+      "~/.config/opencode/**": "allow",
       "/tmp/**": "allow"
     },
     "doom_loop": "ask"
@@ -90,14 +119,14 @@
         "baseURL": "http://127.0.0.1:1234/v1"
       },
       "models": {
-        "qwen3.5-35b-a3b-claude-4.6-opus-reasoning-distilled_moe": {
-          "name": "Qwen3.5 35B-A3B MXFP4"
+        "qwen/qwen3-vl-8b": {
+          "name": "Qwn3 VL 8b"
         },
-        "qwen3.5-27b-claude-4.6-opus-reasoning-distilled-v2": {
-          "name": "Qwen 3.5 27B MXFP4"
+        "openai/gpt-oss-20b": {
+          "name": "OpenAI GPT OSS 20b"
         },
-        "qwen3-coder-next_moe-mxfp4": {
-          "name": "Qwen3 Coder Next MOE MXFP4"
+        "nvidia/nemotron-3-nano": {
+          "name": "NVIDIA Nemotron 3 Nano"
         }
       }
     }
