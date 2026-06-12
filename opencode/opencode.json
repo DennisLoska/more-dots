@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-mem", "cc-safety-net", "./plugins/caveman/plugin.js", "opencode-power-pack@git+https://github.com/waybarrios/opencode-power-pack.git"],
+  "plugin": ["opencode-mem", "cc-safety-net", "./plugins/caveman/plugin.js", "superpowers@git+https://github.com/obra/superpowers.git"],
   "instructions": ["~/.claude/CLAUDE.md", "AGENTS.md"],
   "mcp": {
     "dust": {
