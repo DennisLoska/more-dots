@@ -1,9 +1,5 @@
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
-
-const require = createRequire(import.meta.url);
 
 const DEFAULT_MAX_ITERATIONS = 25;
 const DEFAULT_COMPACT_EVERY = 5;
@@ -121,37 +117,6 @@ export const LoopPlugin = async ({ client, $, directory, worktree }) => {
   }
 
   return {
-    config: async (input, output) => {
-      output.config.command = output.config.command || {};
-
-      output.config.command['loop'] = {
-        description: 'Start an autonomous dev loop that iterates until DONE',
-        template: `You are in an autonomous development loop.
-Task: $ARGUMENTS
-
-Work iteratively. Each turn make concrete progress — read files, write code, run checks.
-When you encounter blockers, resolve them.
-Only when the task is fully complete (verified, no loose ends), output:
-<promise>DONE</promise>
-
-If blocked and cannot proceed, call the loop_blocked tool with the reason.`,
-        agent: 'general',
-        subtask: true,
-      };
-
-      output.config.command['cancel-loop'] = {
-        description: 'Cancel the active loop and summarize progress',
-        template: `The loop was cancelled. Summarize what was accomplished so far.`,
-        agent: 'general',
-      };
-
-      output.config.command['loop-status'] = {
-        description: 'Report current loop status',
-        template: `Check the loop state file and report: is a loop active, iterations completed, what task. Keep it brief.`,
-        agent: 'general',
-      };
-    },
-
     'command.executed': async ({ event }) => {
       if (!event?.command) return;
 

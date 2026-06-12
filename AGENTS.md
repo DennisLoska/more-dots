@@ -39,7 +39,6 @@ Red flags — never say these:
 
 - NEVER read `.env`, `.env.*` (except `.env.example`), `.zshrc`, `.zsh_history`
 - NEVER printenv, sudo, or access secrets
-- NEVER git commit / clean / reset / restore without explicit confirmation
 - NEVER gh delete, gh org, gh secret operations
 - NEVER rm -rf anything
 - ALWAYS ask before installing npm/bun packages
