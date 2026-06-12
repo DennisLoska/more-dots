@@ -1,0 +1,7 @@
+{
+  "name": "opencode-loop-plugin",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "plugin.js",
+  "private": true
+}

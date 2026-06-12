@@ -63,6 +63,15 @@ Provides output compression and slash commands.
 - `/caveman:compress <file>` — compress a memory file into caveman format
 - Also activated by saying "caveman mode", "talk like caveman", "less tokens please"
 
+### loop (local plugin)
+Autonomous dev loop. Re-runs task prompt until DONE or max iterations.
+- `/loop <task> [--max-iterations N] [--compact-every N]` — start loop
+- `/cancel-loop` — cancel active loop
+- `/loop-status` — check loop state
+- AI signals completion with `<promise>DONE</promise>`
+- Auto-compacts context every N iterations (default 5)
+- Default max 25 iterations
+
 ### superpowers (obra/superpowers)
 Full development methodology framework. Provides composable skills.
 - Auto-activates when relevant tasks are detected
@@ -115,6 +124,14 @@ Load via `use skill superpowers/<name>`:
 ### Meta
 - `writing-skills` — create new skills with TDD methodology
 - `using-superpowers` — overview of the entire skills system
+
+## Skills
+
+### loop
+Autonomous dev loop with auto-continuation, compaction, and cancellation.
+- `/loop <task> [--max-iterations N] [--compact-every N]`
+- AI emits `<promise>DONE</promise>` to signal completion
+- Load: `use skill loop` or just reference it naturally
 
 ## Cavecrew Agents (subagents)
 
