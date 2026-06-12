@@ -7,6 +7,11 @@
     "./plugins/loop/plugin.js",
     "superpowers@git+https://github.com/obra/superpowers.git"
   ],
+  "skills": {
+    "paths": [
+      "/Users/dennisloska/.cache/opencode/packages/superpowers@git+https:/github.com/obra/superpowers.git/node_modules/superpowers/skills"
+    ]
+  },
   "permission": {
     "question": "deny",
     "read": {
@@ -27,7 +32,7 @@
     "todowrite": "allow",
     "lsp": "allow",
     "bash": {
-      "*": "ask",
+      "*": "allow",
       "printenv": "deny",
       "sudo *": "deny",
       "curl *": "allow",
