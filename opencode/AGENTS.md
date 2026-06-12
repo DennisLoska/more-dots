@@ -132,6 +132,11 @@ Autonomous dev loop with auto-continuation, compaction, and cancellation.
 - AI emits `<promise>DONE</promise>` to signal completion
 - Load: `use skill loop` or just reference it naturally
 
+### oneshot
+Autonomous end-to-end SDLC via `/oneshot`. 7 phases: brainstorm → plan → implement → verify → PR → review → finish. Enforced via git tags + entry/exit gates. Do NOT trust memory.
+- `/oneshot <task>` — run full pipeline
+- Load: `use skill oneshot`
+
 ## Cavecrew Agents (subagents)
 
 ### @cavecrew-investigator
