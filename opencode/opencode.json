@@ -2,7 +2,6 @@
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
     "opencode-mem",
-    "cc-safety-net",
     "./plugins/caveman/plugin.js",
     "./plugins/loop/plugin.js",
     "superpowers@git+https://github.com/obra/superpowers.git"
@@ -91,7 +90,7 @@
     },
     "doom_loop": "ask"
   },
-  "instructions": ["AGENTS.md"],
+  "instructions": ["AGENTS.md", "~/.config/opencode/skills/caveman/SKILL.md"],
   "mcp": {
     "context7": {
       "type": "remote",

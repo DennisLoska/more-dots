@@ -51,9 +51,6 @@ Persistent memory across sessions. Stores learnings about projects, preferences,
 - Invoke: reference it naturally — "remember that..." or "what do you know about..."
 - It auto-recalls relevant context per-session.
 
-### cc-safety-net
-Blocks destructive git/filesystem commands before they execute. Never try to bypass it — if blocked, step back and confirm with the user.
-
 ### caveman (local plugin)
 Provides output compression and slash commands.
 - `/caveman [lite|full|ultra|wenyan]` — sets compression level
