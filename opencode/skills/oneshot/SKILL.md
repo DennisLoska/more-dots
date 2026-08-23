@@ -7,54 +7,11 @@ description: Use when user invokes /oneshot with a complete task description, or
 
 Autonomous end-to-end SDLC: task → spec → plan → implementation → verification → PR → merge.
 
-**Core principle:** Full autonomy once started. No pauses between phases. User consulted only at design approval, plan approval, and final branch decision. State tracked via git tags — NOT memory.
+**Core principle:** Full autonomy once started. No pauses between phases. User consulted only at design approval, plan approval, and final branch decision.
 
 **Announce at start:** "Oneshot pipeline starting for: [task description]"
 
----
-
-## ⚠️ BOOT INTEGRITY CHECK — Run This First
-
-**Do NOT skip. Do NOT trust memory. Only git tags and filesystem state are authoritative.**
-
-```bash
-# Find latest completed phase from git tags
-last_tag=$(git tag -l 'oneshot/phase-*' 2>/dev/null | sort -t- -k3 -n | tail -1)
-if [ -n "$last_tag" ]; then
-  last_phase=${last_tag##*-}
-  echo "Last verified phase: $last_phase"
-  # Verify all prior phase artifacts
-  for p in $(seq 1 "$last_phase"); do
-    if ! git tag -l "oneshot/phase-$p" | grep -q .; then
-      echo "ERROR: Gap at phase $p — tag $last_tag exists but phase $p tag missing"
-      echo "State corrupted. Starting fresh."
-      last_phase=0
-      break
-    fi
-  done
-  # Verify phase-required artifacts
-  case "$last_phase" in
-    1) test -f "$(ls -t docs/superpowers/specs/*.md 2>/dev/null | head -1)" 2>/dev/null || {
-         echo "ERROR: Phase 1 tag exists but no spec file"
-         echo "State corrupted. Starting fresh."
-         last_phase=0
-       } ;;
-    2) test -f "$(ls -t docs/superpowers/plans/*.md 2>/dev/null | head -1)" 2>/dev/null || {
-         echo "ERROR: Phase 2 tag exists but no plan file"
-         echo "State corrupted. Starting fresh."
-         last_phase=0
-       } ;;
-  esac
-  CURRENT_PHASE=$((last_phase + 1))
-else
-  CURRENT_PHASE=1
-fi
-
-echo "Starting from Phase $CURRENT_PHASE"
-echo "ONESHOT_PHASE=$CURRENT_PHASE" > .oneshot-state
-```
-
-If this check resets to fresh start, surface it: "Pipeline state corrupted — restarting from Phase 1."
+**Context hygiene:** This skill is subagent-driven. Main session orchestrates phases 1-2-4-5-6-7 directly (need user interaction), but Phase 3 EXECUTE is fully delegated to subagents via `task` tool. Main never writes implementation code inline.
 
 ---
 
@@ -89,27 +46,15 @@ digraph oneshot {
     "dispatching-parallel-agents skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ using-git-worktrees\n+ test-driven-development";
     "Parallel work?" -> "Phase 4: VERIFY\nverification-before-completion" [label="no"];
     "Phase 4: VERIFY\nverification-before-completion" -> "Phase 5: PR\nrequesting-code-review";
-    "Phase 5: PR\nrequesting-code-review" -> "Phase 6: REVIEW\nreceiving-code-review";
-    "Phase 6: REVIEW\nreceiving-code-review" -> "Phase 7: FINISH\nfinishing-a-development-branch";
-    "Phase 6: REVIEW\nreceiving-code-review" -> "Escalate to user" [label="review conflict"];
+    "Phase 5: PR\nrequesting-code-review" -> "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green";
+    "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green" -> "Phase 7: FINISH\nfinishing-a-development-branch" [label="PASS + green"];
+    "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green" -> "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green" [label="FAIL → fix → re-review (≤5)"];
+    "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green" -> "Escalate to user" [label="5 rounds no PASS"];
     "Systematic debugging needed?" -> "Escalate to user" [label="unfixable"];
 }
 ```
 
-## State Tracking (NOT negotiable)
-
-Pipeline state is tracked by git tags. Memory is NOT authoritative.
-
-**Rules:**
-- Each completed phase creates tag `oneshot/phase-N` with date + description
-- `.oneshot-state` file in project root caches current phase (local, gitignored)
-- On resume: boot check reads tags, NOT memory
-- If tags and artifacts conflict: roll back to last verified state
-
-**`.gitignore` entry (run once):**
-```bash
-echo ".oneshot-state" >> .gitignore
-```
+Run phases sequentially 1→7. No skipping. Validate prior phase artifact exists before proceeding.
 
 ---
 
@@ -117,56 +62,23 @@ echo ".oneshot-state" >> .gitignore
 
 **Output:** `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
 
-### Entry Gate
-
-```bash
-# Verify we have no gap. Should be Phase 1 or skip-approved.
-source .oneshot-state 2>/dev/null || CURRENT_PHASE=1
-if [ "$CURRENT_PHASE" -gt 2 ]; then
-  echo "Phase 1 already completed (tag: $(git tag -l 'oneshot/phase-1')). Skipping..."
-  exit 0
-fi
-# Check skip condition
-spec_file=$(ls -t docs/superpowers/specs/*.md 2>/dev/null | head -1)
-if [ -n "$spec_file" ] && git tag -l 'oneshot/phase-1' | grep -q .; then
-  echo "Phase 1 artifacts verified. Skipping..."
-  exit 0
-fi
-```
-
 ### ⚠️ MANDATORY: Load Brainstorming Skill
 
-**You MUST invoke the `brainstorming` skill via the `skill` tool now.** It provides the checklist for design exploration, requirements gathering, and architecture decisions. Without its content in context, you will miss required steps.
+**You MUST invoke the `brainstorming` skill via the `skill` tool now.** It provides checklist for design exploration, requirements gathering, architecture decisions. Without it you will miss required steps.
 
-After loading it, follow the DESIGN checklist it provides. This includes:
+After loading, follow DESIGN checklist it provides. Includes:
 - Understanding user needs
 - Exploring architecture options
 - Documenting design decisions
-- Getting user approval before writing the spec
+- Getting user approval before writing spec
 
 ### Execution
 
-1. Follow brainstorming skill's checklist exactly
+1. Follow brainstorming skill checklist exactly
 2. Present design to user, get approval
 3. Write spec to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
 4. Commit spec: `git add docs/superpowers/specs/ && git commit -m "docs: spec for [topic]"`
-5. **Do NOT pause** — proceed to Exit Gate
-
-### Exit Gate
-
-```bash
-spec_file=$(ls -t docs/superpowers/specs/*.md 2>/dev/null | head -1)
-if [ -z "$spec_file" ]; then
-  echo "FATAL: No spec file found in docs/superpowers/specs/"
-  echo "Phase 1 incomplete. Cannot proceed."
-  exit 1
-fi
-echo "ONESHOT_PHASE=2" > .oneshot-state
-git tag -f "oneshot/phase-1" -m "BRAINSTORM complete: $spec_file"
-echo "Phase 1 complete. Tag: oneshot/phase-1"
-```
-
-Automatically proceed to Phase 2.
+5. Proceed to Phase 2
 
 ---
 
@@ -174,57 +86,16 @@ Automatically proceed to Phase 2.
 
 **Output:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 
-### Entry Gate
-
-```bash
-source .oneshot-state 2>/dev/null || CURRENT_PHASE=1
-if [ "$CURRENT_PHASE" -lt 2 ]; then
-  echo "ERROR: Phase 2 entry gate failed. Phase 1 not complete."
-  echo "Run boot integrity check and complete Phase 1 first."
-  exit 1
-fi
-if [ "$CURRENT_PHASE" -gt 3 ]; then
-  echo "Phase 2 already completed. Skipping..."
-  exit 0
-fi
-if ! git tag -l 'oneshot/phase-2' | grep -q .; then
-  # Verify Phase 1 artifacts are solid
-  spec_file=$(ls -t docs/superpowers/specs/*.md 2>/dev/null | head -1)
-  if [ -z "$spec_file" ]; then
-    echo "ERROR: Phase 1 claimed complete but no spec file found. Run boot check."
-    exit 1
-  fi
-fi
-```
-
 ### ⚠️ MANDATORY: Load Writing-Plans Skill
 
-**You MUST invoke the `writing-plans` skill via the `skill` tool now.** It contains the decomposition checklist for breaking specs into executable tasks with file paths, dependencies, and effort estimates. Without it, the plan will be unstructured.
-
-After loading, follow its checklist to produce a plan document.
+**You MUST invoke the `writing-plans` skill via the `skill` tool now.** It contains decomposition checklist for breaking specs into executable tasks with file paths, dependencies, effort estimates. Without it plan will be unstructured.
 
 ### Execution
 
-1. Follow writing-plans skill's checklist exactly
+1. Follow writing-plans skill checklist exactly
 2. Save plan to `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`, commit
-3. Present execution options to user:
-   - Option 1 (recommended): Subagent-Driven Development
-   - Option 2: Inline execution
-4. After user chooses → proceed to Exit Gate
-
-### Exit Gate
-
-```bash
-plan_file=$(ls -t docs/superpowers/plans/*.md 2>/dev/null | head -1)
-if [ -z "$plan_file" ]; then
-  echo "FATAL: No plan file found in docs/superpowers/plans/"
-  echo "Phase 2 incomplete. Cannot proceed."
-  exit 1
-fi
-echo "ONESHOT_PHASE=3" > .oneshot-state
-git tag -f "oneshot/phase-2" -m "PLAN complete: $plan_file"
-echo "Phase 2 complete. Tag: oneshot/phase-2"
-```
+3. Execution mode is **Subagent-Driven Development only** (keeps main context clean). Do NOT offer inline execution.
+4. Proceed to Phase 3
 
 ---
 
@@ -233,53 +104,23 @@ echo "Phase 2 complete. Tag: oneshot/phase-2"
 **Sub-skills:** `using-git-worktrees`, `test-driven-development`
 **Error routing:** `systematic-debugging`
 
-### Entry Gate
-
-```bash
-source .oneshot-state 2>/dev/null || CURRENT_PHASE=1
-if [ "$CURRENT_PHASE" -lt 3 ]; then
-  echo "ERROR: Phase 3 entry gate failed. Phase 2 not complete."
-  exit 1
-fi
-if [ "$CURRENT_PHASE" -gt 4 ]; then
-  echo "Phase 3 already completed. Skipping..."
-  exit 0
-fi
-if ! git tag -l 'oneshot/phase-2' | grep -q .; then
-  echo "ERROR: Phase 3 entry gate failed — no oneshot/phase-2 tag."
-  exit 1
-fi
-plan_file=$(ls -t docs/superpowers/plans/*.md 2>/dev/null | head -1)
-if [ -z "$plan_file" ]; then
-  echo "ERROR: Phase 2 tag exists but no plan file. State corrupted."
-  exit 1
-fi
-```
-
 ### ⚠️ MANDATORY: Load Execution Skills
 
-Based on user's choice from Phase 2:
+You MUST invoke via `skill` tool:
+- `subagent-driven-development` — dispatch pattern, keeps main context clean
+- `using-git-worktrees` — isolated workspace per task
+- `test-driven-development` — TDD workflow
 
-- **Subagent-Driven Development** chosen: invoke `subagent-driven-development` skill
-- **Inline execution** chosen: invoke `executing-plans` skill
+All three are required. No inline execution path.
 
-**Additionally, you MUST invoke:**
-- `using-git-worktrees` — sets up isolated workspace
-- `test-driven-development` — guides TDD workflow
+### Execution (subagent-driven, context-clean)
 
-Load these via the `skill` tool now. Each adds required checklists.
-
-### Execution
-
-If user chose Subagent-Driven Development:
-1. Invoke `using-git-worktrees` to set up isolated workspace
-2. Dispatch each task from the plan as a fresh subagent
-3. Two-stage review after each task completes
-4. All subagents MUST follow TDD (test before code)
-
-If user chose Inline Execution:
-1. Batch tasks with checkpoints
-2. Use TDD for all implementation
+1. Invoke `using-git-worktrees` to set up isolated workspace/branch
+2. For each task in plan: dispatch via `task` tool as fresh subagent (type: general or explore as needed)
+3. Each subagent follows TDD: write failing test → implement → pass
+4. Two-stage review after each task completes
+5. Main session only orchestrates — no direct code writes in main context
+6. If plan has independent sub-tasks: also invoke `dispatching-parallel-agents` for parallel dispatch
 
 **Error routing:** If any task fails:
 - Route to `systematic-debugging` skill
@@ -288,47 +129,15 @@ If user chose Inline Execution:
 
 **Parallel work:** If plan has independent sub-tasks, invoke `dispatching-parallel-agents` skill.
 
-### Exit Gate
-
-```bash
-# Verify implementation matches plan
-echo "Verifying implementation against plan..."
-plan_file=$(ls -t docs/superpowers/plans/*.md 2>/dev/null | head -1)
-echo "Plan: $plan_file"
-echo "Branch: $(git branch --show-current)"
-# Note: detailed verification happens in Phase 4
-echo "ONESHOT_PHASE=4" > .oneshot-state
-git tag -f "oneshot/phase-3" -m "EXECUTE complete"
-echo "Phase 3 complete. Tag: oneshot/phase-3"
-```
-
 ---
 
 ## Phase 4: VERIFY
 
 **Skill:** `verification-before-completion`
 
-### Entry Gate
-
-```bash
-source .oneshot-state 2>/dev/null || CURRENT_PHASE=1
-if [ "$CURRENT_PHASE" -lt 4 ]; then
-  echo "ERROR: Phase 4 entry gate failed. Phase 3 not complete."
-  exit 1
-fi
-if [ "$CURRENT_PHASE" -gt 5 ]; then
-  echo "Phase 4 already completed. Skipping..."
-  exit 0
-fi
-if ! git tag -l 'oneshot/phase-3' | grep -q .; then
-  echo "ERROR: Phase 4 entry gate failed — no oneshot/phase-3 tag."
-  exit 1
-fi
-```
-
 ### ⚠️ MANDATORY: Load Verification Skill
 
-**You MUST invoke the `verification-before-completion` skill via the `skill` tool now.** It provides the verification checklist and the 30-second reality check framework. Without it, verification is ad-hoc and unreliable.
+**You MUST invoke the `verification-before-completion` skill via the `skill` tool now.** It provides verification checklist and 30-second reality check framework.
 
 ### Execution
 
@@ -339,42 +148,15 @@ fi
 5. Cross-check implementation against spec requirements
 6. Fix any failures — do NOT proceed with failures
 
-### Exit Gate
-
-```bash
-echo "Verification complete. All checks passed."
-echo "ONESHOT_PHASE=5" > .oneshot-state
-git tag -f "oneshot/phase-4" -m "VERIFY complete"
-echo "Phase 4 complete. Tag: oneshot/phase-4"
-```
-
 ---
 
 ## Phase 5: PR
 
 **Skill:** `requesting-code-review`
 
-### Entry Gate
-
-```bash
-source .oneshot-state 2>/dev/null || CURRENT_PHASE=1
-if [ "$CURRENT_PHASE" -lt 5 ]; then
-  echo "ERROR: Phase 5 entry gate failed. Phase 4 not complete."
-  exit 1
-fi
-if [ "$CURRENT_PHASE" -gt 6 ]; then
-  echo "Phase 5 already completed. Skipping..."
-  exit 0
-fi
-if ! git tag -l 'oneshot/phase-4' | grep -q .; then
-  echo "ERROR: Phase 5 entry gate failed — no oneshot/phase-4 tag."
-  exit 1
-fi
-```
-
 ### ⚠️ MANDATORY: Load PR Skill
 
-**You MUST invoke the `requesting-code-review` skill via the `skill` tool now.** It provides the pre-merge checklist and PR template.
+**You MUST invoke the `requesting-code-review` skill via the `skill` tool now.** It provides pre-merge checklist and PR template.
 
 ### Execution
 
@@ -383,58 +165,54 @@ fi
 3. Save PR URL
 4. Request review from configured reviewers
 
-### Exit Gate
-
-```bash
-echo "ONESHOT_PHASE=6" > .oneshot-state
-pr_url=$(gh pr view --json url --jq '.url' 2>/dev/null)
-git tag -f "oneshot/phase-5" -m "PR created: $pr_url"
-echo "Phase 5 complete. Tag: oneshot/phase-5"
-```
-
 ---
 
-## Phase 6: REVIEW RECEPTION
+## Phase 6: ADVERSARIAL REVIEW LOOP (max 5 rounds)
 
-**Skill:** `receiving-code-review`
+**Skills:** `receiving-code-review` + `cavecrew-reviewer` (or `caveman-review`) + `verification-before-completion` (tests) + `systematic-debugging` on failure
+**Gate to Phase 7:** `REVIEW == PASS` **AND** `tests == green` (if tests exist). Both required.
+**Loop cap:** 5 rounds. No proceed on FAIL or red tests.
 
-### Entry Gate
+### ⚠️ MANDATORY: Load Review Skills
 
-```bash
-source .oneshot-state 2>/dev/null || CURRENT_PHASE=1
-if [ "$CURRENT_PHASE" -lt 6 ]; then
-  echo "ERROR: Phase 6 entry gate failed. Phase 5 not complete."
-  exit 1
-fi
-if [ "$CURRENT_PHASE" -gt 7 ]; then
-  echo "Phase 6 already completed. Skipping..."
-  exit 0
-fi
-if ! git tag -l 'oneshot/phase-5' | grep -q .; then
-  echo "ERROR: Phase 6 entry gate failed — no oneshot/phase-5 tag."
-  exit 1
-fi
+You MUST invoke via `skill` tool:
+- `receiving-code-review` — rigor over performative agreement
+- `cavecrew-reviewer` / `caveman-review` — adversarial one-line findings format (optional but recommended for reviewer subagent prompt)
+
+### Adversarial Reviewer Stance
+
+Reviewer subagent assumes code is broken. Must try to find bugs, not confirm quality. Instructions for reviewer subagent:
+
+> You are adversarial reviewer. Assume implementation has bugs. Check: spec compliance, edge cases, error handling, security, performance, test coverage, diff vs plan, hidden regressions. Output `PASS` only if zero blocking issues. Otherwise `FAIL` + findings as `path:line: 🔴 bug: ...` / `🟡 risk: ...` + concrete fix. Be strict.
+
+### Execution — Loop (≤5 rounds)
+
+```
+round = 1..5:
+  1. Dispatch reviewer subagent via `task` tool (fresh context, reads spec + plan + diff + runs tests if present)
+     Reviewer outputs: PASS or FAIL + findings, plus tests status (green/red/ no-tests)
+  2. Run verification: `tests` (if existent) must be green. `lint`/`typecheck`/`build` if applicable. Record result.
+  3. Decision:
+     - if PASS && tests green (or no tests but reviewer PASS + build green) → break loop, proceed to Phase 7
+     - if FAIL or tests red → dispatch fix subagent(s) via `task` (type: general/cavecrew-builder, 1-2 files max per subagent) to address ALL findings, push fix, round++
+  4. If round == 5 and still FAIL/red → escalate to user with: round count, last review findings, test output, diff summary. Do NOT proceed to Phase 7. Await user decision (force-merge / more fixes / discard).
 ```
 
-### ⚠️ MANDATORY: Load Review Reception Skill
+### Rules
 
-**You MUST invoke the `receiving-code-review` skill via the `skill` tool now.** It provides guidance on handling feedback with technical rigor instead of performative agreement.
+- Each round uses fresh subagents: reviewer never fixes, fixer never reviews (separation of concerns).
+- Fixer must run tests before declaring done; main verifies green.
+- No skipping rounds. No early FINISH on FAIL.
+- If no test suite exists: reviewer PASS + build/lint green suffices, but reviewer must flag `no tests` as 🟡 risk.
+- Max 5 rounds enforced — 6th round is escalation, not auto-loop.
 
-### Execution
+### Opencode Loop Support
 
-1. Check for review feedback (poll if needed)
-2. Address each comment with technical rigor
-3. Push updates as needed
-4. If reviewer is wrong: push back with evidence
-5. If unresolvable conflict: escalate to user
+Opencode has no native adversarial-review-loop primitive. Supported via composition:
+- Loop plugin `/loop --max-iterations 5` auto-re-prompt on `<promise>DONE</promise>` — usable but not review-specific.
+- Preferred here: manual `task` loop in main session (above) — keeps review history in main context, no plugin state file needed, works with `subagent-driven-development`.
+- If you want autonomous `/loop` variant: run `/loop adversarial review PR --max-iterations 5` and make reviewer emit `<promise>DONE</promise>` only on PASS+green. Both patterns valid; this skill uses manual loop for determinism.
 
-### Exit Gate
-
-```bash
-echo "ONESHOT_PHASE=7" > .oneshot-state
-git tag -f "oneshot/phase-6" -m "REVIEW complete"
-echo "Phase 6 complete. Tag: oneshot/phase-6"
-```
 
 ---
 
@@ -442,23 +220,9 @@ echo "Phase 6 complete. Tag: oneshot/phase-6"
 
 **Skill:** `finishing-a-development-branch`
 
-### Entry Gate
-
-```bash
-source .oneshot-state 2>/dev/null || CURRENT_PHASE=1
-if [ "$CURRENT_PHASE" -lt 7 ]; then
-  echo "ERROR: Phase 7 entry gate failed. Phase 6 not complete."
-  exit 1
-fi
-if ! git tag -l 'oneshot/phase-6' | grep -q .; then
-  echo "ERROR: Phase 7 entry gate failed — no oneshot/phase-6 tag."
-  exit 1
-fi
-```
-
 ### ⚠️ MANDATORY: Load Finish Skill
 
-**You MUST invoke the `finishing-a-development-branch` skill via the `skill` tool now.** It provides the merge decision framework.
+**You MUST invoke the `finishing-a-development-branch` skill via the `skill` tool now.** It provides merge decision framework.
 
 ### Execution
 
@@ -468,16 +232,9 @@ fi
    - Option 2: PR already created (provide URL)
    - Option 3: Keep branch as-is
    - Option 4: Discard
-3. Execute user's choice
+3. Execute user choice
 
-### Exit Gate
-
-```bash
-echo "ONESHOT_PHASE=8" > .oneshot-state
-git tag -f "oneshot/phase-7" -m "FINISH complete"
-echo "ONESLOT pipeline complete."
-memory add "oneshot completed: [task] on [branch]"
-```
+On completion: `memory add "oneshot completed: [task] on [branch]"`
 
 ---
 
@@ -487,40 +244,39 @@ memory add "oneshot completed: [task] on [branch]"
 |---------|-------|--------|
 | Task fails during execution | systematic-debugging | Find root cause, fix, retry |
 | Unfixable bug | User escalation | Report phase + error + context |
-| Reviewer disagrees | receiving-code-review | Technical pushback or escalate |
-| Spec incomplete | Back to Phase 1 | Fix gaps, re-approve. Remove tag `oneshot/phase-1` first. |
-| Plan has gaps | writing-plans | Add missing tasks inline. Remove tag `oneshot/phase-2` first. |
-| User interrupts | Boot check on resume | Resume from last tagged phase |
-| Entry gate fails | Boot check | Run boot check to sync state |
+| Reviewer FAIL (rounds ≤5) | adversarial review loop | Fix subagent → re-review, repeat ≤5 |
+| Spec incomplete | Back to Phase 1 | Fix gaps, re-approve |
+| Plan has gaps | writing-plans | Add missing tasks inline |
+| User interrupts | Resume from artifacts | Resume from last completed phase artifact |
 
 ## Red Flags
 
 **Never:**
 - Skip phases (all 7 required)
-- Trust memory over git tags/filesystem
-- Proceed without entering a phase through its entry gate
-- Proceed without loading a phase's required skill(s)
-- Skip the boot integrity check on start/resume
+- Proceed without loading phase required skill(s)
 - Proceed without user approval on design and plan
 - Merge without verification
 - Skip test-driven development
 - Ignore verification failures
 - Continue past unfixable error without user escalation
+- Proceed to FINISH on FAIL review or red tests
+- Exceed 5 review rounds without escalation
 
 **Always:**
-- Run boot integrity check first
-- Run all entry gate steps (don't summarize — execute the bash)
-- Load every required skill via the `skill` tool
-- Save git tag after each phase
+- Load every required skill via `skill` tool
+- Validate prior phase artifact exists before next phase
 - Verify before claiming completion
+- Escalate after 5 failed review rounds
 - Escalate unfixable issues
 - Present structured choices to user
 
 ## Key Principles
 
 - **Full autonomy:** Execute all phases without pausing between them
-- **Git-tagged state:** Tags are truth, not memory. Boot check confirms integrity.
+- **Artifact-based resume:** Prior phase artifacts (spec/plan) are truth for resume
 - **Error-hardened:** Route problems to systematic-debugging before escalating
 - **User consulted at 3 gates only:** design, plan choice, final branch decision
-- **Subagents for implementation:** fresh context per task, no pollution
+- **Subagents for implementation:** fresh context per task, no pollution — main session stays lean
+- **Context-clean guarantee:** All code execution via `task` subagents; main only holds spec/plan/PR state
 - **TDD always:** subagents write failing test before production code
+- **Adversarial review gate:** FINISH only on PASS + green tests, max 5 rounds, reviewer ≠ fixer

@@ -3,13 +3,13 @@
   "plugin": [
     "opencode-mem",
     "./plugins/caveman/plugin.js",
-    "./plugins/loop/plugin.js",
+    "./plugins/opencode-loop.ts",
     "superpowers@git+https://github.com/obra/superpowers.git"
   ],
   "lsp": {},
   "skills": {
     "paths": [
-      "/Users/dennisloska/.cache/opencode/packages/superpowers@git+https:/github.com/obra/superpowers.git/node_modules/superpowers/skills"
+      "/home/dennis/.cache/opencode/packages/superpowers@git+https:/github.com/obra/superpowers.git/node_modules/superpowers/skills"
     ]
   },
   "permission": {
@@ -95,7 +95,10 @@
     },
     "doom_loop": "ask"
   },
-  "instructions": ["AGENTS.md", "~/.config/opencode/skills/caveman/SKILL.md"],
+  "instructions": [
+    "AGENTS.md",
+    "~/.config/opencode/skills/caveman/SKILL.md"
+  ],
   "mcp": {
     "context7": {
       "type": "remote",
@@ -104,7 +107,11 @@
     },
     "caveman-shrink": {
       "type": "local",
-      "command": ["npx", "-y", "caveman-shrink"],
+      "command": [
+        "npx",
+        "-y",
+        "caveman-shrink"
+      ],
       "enabled": true
     },
     "filesystem": {
@@ -113,14 +120,20 @@
         "npx",
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/Users/dennisloska/work",
+        "/home/dennis/work",
         "/tmp"
       ],
       "enabled": true
     },
     "chrome-devtools": {
       "type": "local",
-      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--executablePath",
+        "/usr/bin/chromium"
+      ],
       "enabled": true
     }
   },

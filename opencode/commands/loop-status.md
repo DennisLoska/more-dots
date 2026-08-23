@@ -1,5 +1,6 @@
 ---
-description: Report current loop status
-agent: general
+description: Show OpenCode Loop status.
+agent: opencode-loop-local
 ---
-Check the loop state file and report: is a loop active, iterations completed, what task. Keep it brief.
+
+OpenCode Loop status command handled locally. Reply exactly: OK.

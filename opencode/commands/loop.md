@@ -1,14 +1,6 @@
 ---
-description: Start an autonomous dev loop that iterates until DONE
-subtask: true
-agent: general
+description: "Auto-continue or schedule work. /loop <task> = every idle; /loop every 5m <task> = recurring; /loop after 5m <task> = once."
+agent: opencode-loop-local
 ---
-You are in an autonomous development loop.
-Task: $ARGUMENTS
 
-Work iteratively. Each turn make concrete progress — read files, write code, run checks.
-When you encounter blockers, resolve them.
-Only when the task is fully complete (verified, no loose ends), output:
-<promise>DONE</promise>
-
-If blocked and cannot proceed, call the loop_blocked tool with the reason.
+OpenCode Loop local command handled. Reply exactly: OK.
