@@ -24,16 +24,20 @@ Before declaring any task complete, you MUST verify:
 - Check for error messages in output
 - Would I bet actual money this works?
 
+Hygiene: `bunx tsc`/`lint`/`build` output fine inline (short). Broad test mapping (>1 file) delegate to subagent instead of inline `read` loops.
+
 Red flags — never say these:
 - "This should work now" (especially 2nd+ time on same issue)
 - "Try it now" (without trying it yourself first)
 - "The logic is correct so..." (logic is not proof)
 
-## Tool Preferences
+## Tool Preferences & Context Hygiene
 
-- Use `rg` (ripgrep) instead of `grep` for code searching
-- Use `fd` instead of `find` for file searching
-- Prefer `bun` over `npm` or `yarn` for JavaScript/TypeScript projects
+- Prefer `rg` over `grep`, `fd` over `find`, `bun` over `npm`/`yarn` — but run `rg`/`fd` inside subagents, not inline in main.
+- **Hygiene rule:** Any search touching >1 file or >50 lines must delegate to subagent. Inline `read`/`bash ls` only for single file you will immediately `edit` or trivial existence check.
+- `cavecrew-investigator` (`task` `subagent_type: cavecrew-investigator`): read-only locator, compressed `file:line` table, no snippets, no fix suggestions. Use for "where is X defined", "what calls Y", "list all uses of Z", fast maps. ~60% smaller than `explore`.
+- `explore` (`task` `subagent_type: explore`): thorough reader, `file:line` + code blocks + env values + interaction graphs. Use when need full snippets, dep chains, planning context.
+- Main never loops `rg`/`fd`/`read` directly — subagent output compressed keeps main lean for long sessions.
 
 ## Security & Boundaries
 
@@ -50,9 +54,6 @@ Red flags — never say these:
 Persistent memory across sessions. Stores learnings about projects, preferences, and decisions.
 - Invoke: reference it naturally — "remember that..." or "what do you know about..."
 - It auto-recalls relevant context per-session.
-
-### cc-safety-net
-Blocks destructive git/filesystem commands before they execute. Never try to bypass it — if blocked, step back and confirm with the user.
 
 ### caveman (local plugin)
 Provides output compression and slash commands.
@@ -133,23 +134,20 @@ Autonomous dev loop with auto-continuation, compaction, and cancellation.
 - Load: `use skill loop` or just reference it naturally
 
 ### oneshot
-Autonomous end-to-end SDLC via `/oneshot`. 7 phases: brainstorm → plan → implement → verify → PR → review → finish. State tracked by git tags. Entry/exit gates enforce phase completion.
+Autonomous end-to-end SDLC via `/oneshot`. 7 phases: brainstorm → plan → implement → verify → PR → review → finish. Enforced via git tags + entry/exit gates. Do NOT trust memory.
 - `/oneshot <task>` — run full pipeline
-- Load: use `/oneshot <task>` or `use skill oneshot`
+- Load: `use skill oneshot`
 
-## Cavecrew Agents (subagents)
+## Cavecrew Agents (subagents) — context-hygiene core
 
 ### @cavecrew-investigator
-Read-only code locator. Use for: "where is X defined", "what calls Y", "list all uses of Z".
-Returns file:line tables. Refuses to suggest fixes.
+Read-only locator. `file:line` table, caveman-compressed. Use for: "where is X defined", "what calls Y", "list all uses of Z". ~60% smaller than `explore`, keeps main lean. Refuses fixes.
 
 ### @cavecrew-reviewer
-Diff/branch/file reviewer. One-line findings with severity tags.
-Use for: "review this PR", "review my diff", "audit this file".
+Diff/branch/file reviewer. One line per finding `path:line: emoji severity: problem. fix.` Use for: "review this PR", "review my diff".
 
 ### @cavecrew-builder
-Surgical 1-2 file editor. Typo fixes, single-function rewrites, mechanical renames.
-Max 2 files. No new abstractions. No drive-by refactors.
+Surgical 1-2 file editor. Typo fixes, single-function rewrites, mechanical renames. Max 2 files. No new abstractions.
 
 ## Definition of Done
 
