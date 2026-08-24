@@ -10,7 +10,7 @@ Wrapper over `generate-comfy-image` for YouTube thumbnails. Fixes two failures s
 ## When to use
 
 * User says `thumbnail`, `youtube thumb`, `thumb of myself/narrator`, `narrator + <style>` (void vision, luna art, pixel art, pencil, classic, coloring, anime), or any style from `generate-comfy-image` registry.
-* Map: `myself`/`me`/`narrator` → `the_narrator` (always add `the young man wearing glasses` AFTER triggers). Styles: `void`→`void_vision`, `luna`→`luna_art`, `pixel`→`pixel art`, `pencil`→`pencil sketch`, `classic`→`classic painting`, etc. If unknown style, `search_models(folder=loras)` then map.
+* Map: `myself`/`me`/`narrator` → `the_narrator` (default `the young man wearing glasses` AFTER triggers only when narrator used and no custom description — not always wearing glasses). Styles: `void`→`void_vision`, `luna`→`luna_art`, `pixel`→`pixel art`, `pencil`→`pencil sketch`, `classic`→`classic painting`, etc. If unknown style, `search_models(folder=loras)` then map.
 
 ## Depends on
 
@@ -21,7 +21,7 @@ Wrapper over `generate-comfy-image` for YouTube thumbnails. Fixes two failures s
 
 * Layout: 16:9 `1280x720` (default thumb) — subject on **right 50%**, **left 40% negative space** clean for text (no clutter, no generated text). `batch_size 1`.
 * Framing: extreme close-up portrait, face + small upper chest only, eye-level, sharp focus on face, no full body, no second person, no drawing/sketch artifact.
-* Narrator: `the_narrator` + `the young man wearing glasses` (triggers first, description after) — brown hair, glasses. Eyes normal by default. **Optional eye effect** only if user explicitly requests `terminator`/`cybernetic`/`red eye`: then `subject's right eye (screen-left, viewer's left side of his face) glowing bright red Terminator cybernetic (circular, emissive), left eye normal dark` — and must be correct side. Do NOT add red eye unless requested.
+* Narrator: `the_narrator` + default `the young man wearing glasses` AFTER triggers when narrator active (only if user gave no specific appearance) — brown hair, glasses. Eyes normal by default. **Optional eye effect** only if user explicitly requests `terminator`/`cybernetic`/`red eye`: then `subject's right eye (screen-left, viewer's left side of his face) glowing bright red Terminator cybernetic (circular, emissive), left eye normal dark` — and must be correct side. Do NOT add red eye unless requested.
 * Background: clean/neutral by default. Holographic world suffix `shiny holographic glow ... fractal labyrinth portal mandala` ONLY if user explicitly requests `luna/holographic/glass world` style. Otherwise use simple `neutral background` or keep empty. Do not pollute empty prompt with mandala filler.
 * Text: **NOT in diffusion**. Prompt contains `left side empty clean area for typography, no text, no watermark, no letters`. Text added post as vector overlay on left.
 * Style intensity via lora weights (see Experiment).
@@ -34,7 +34,7 @@ Wrapper over `generate-comfy-image` for YouTube thumbnails. Fixes two failures s
   * 1 lora: `51` with `strength_model=strength_clip=weight`
   * 2 loras: `51→52` (e.g. narrator 1.0 → luna 0.75), `27.clip ["52",1]`, `11.model ["52",0]`
   * 3 loras: `51→52→53` — lower weights to avoid bleed (e.g. 1.0→0.7→0.4, sum <1.8)
-* Triggers: always prepend in chain order, e.g. `the_narrator, luna_art` then descriptive `the young man wearing glasses` AFTER triggers. Example 2-lora: `the_narrator, luna_art, the young man wearing glasses, <thumb prompt>` → nodes 51 luna? No, order matters — ensure chain and prefix match.
+* Triggers: always prepend in chain order, e.g. `the_narrator, luna_art` then default descriptive `the young man wearing glasses` AFTER triggers only when narrator used (user can override, not always wearing glasses). Example 2-lora: `the_narrator, luna_art, the young man wearing glasses, <thumb prompt>` → nodes 51 luna? No, order matters — ensure chain and prefix match.
 
 ## Text Overlay (post-diffusion, mandatory)
 
@@ -137,6 +137,9 @@ User: `generate thumbnail with void vision and pixel art`
 * Do not stop after one batch — loop with critique until 3 good.
 * Do not ignore eye side when terminator requested — explicitly `subject's right eye (screen-left)`; check each image visually. If no eye effect requested, verify both eyes normal.
 * Do not change resolution to fix style — vary weights/prompts instead.
+* Do not use `ben_dark_gold` to get yellow text — ben is white on gold block `#D4AF37`; for yellow text `#FFD600` use `base --per-word "WORD:yellow"` (e.g. `OVERCOMING` white + `PERFECTIONISM:yellow`).
+* Long words >12 letters (e.g. PERFECTIONISM) overflow ben block `0.52*W` — use `base` per-word yellow instead of block.
+* Do not edit `overlay_helper.py` / skill files at runtime to fix style — choose correct style instead.
 
 ## Reference Material Consolidated (24 thumbs embedded)
 
@@ -171,6 +174,7 @@ Add new channel: copy `ben_dark_gold` block in `reference_styles.json`, change 2
 python scripts/overlay_helper.py --input renders/raw.png --output renders/final.png --lines "NO" "SHORTCUT" --style ben_dark_gold --subtitle "THE WITCHES OF THESSALY"
 python scripts/overlay_helper.py --input raw.png --output final.png --lines "WHY" "PARADISE WOULD BORE YOU" --style peterson_heavenly --per-word "PARADISE:orange,BORE:orange"
 python scripts/overlay_helper.py --input raw.png --output final.png --lines '"BIOLOGY HAS NO' 'LIMITS."' --style chris_heavenly --per-word "LIMITS.:heavenly"
+python scripts/overlay_helper.py --input raw.png --output final.png --lines "OVERCOMING" "PERFECTIONISM" --style base --per-word "PERFECTIONISM:yellow" # yellow text, no block — use for OVERCOMING/PERFECTIONISM
 # explicit border only if you really want: --border gold,8 (not default)
 ```
 

@@ -41,14 +41,14 @@ Stored templates in this skill:
 | `pixel` | `pixel_art_style_z_image_turbo.safetensors` | `pixel art` | `pixel art, digital art, layered art` | Pixel art |
 | `classic` | `Classic_Painting_Z_Image_Turbo_v1_renderartist_1750.safetensors` | `classic painting` | `classic painting, layered art` | Classic painting |
 | `coloring` | `Coloring_Book_Z_Image_Turbo_v1_renderartist_2000.safetensors` | `coloring book` | `coloring book, paper sketch` | Coloring book |
-| `narrator_base` | `the_narrator_v0.safetensors` | `the_narrator` | Always prefix prompt with `the_narrator` + `the young man wearing glasses` AFTER triggers + holographic world suffix | Primary narrator v0 base — user favorite |
+| `narrator_base` | `the_narrator_v0.safetensors` | `the_narrator` | Default when narrator used: add `the young man wearing glasses` AFTER triggers (only if narrator lora active and user gave no specific appearance — narrator not always wearing glasses, so no extra hair/eye details by default) | Primary narrator v0 base — user favorite |
 | `narrator_v1_3000` | `the_narrator_v1_000003000.safetensors` | `the_narrator` | Same, v1 3000 — maps to user "narrator 1.0" | Narrator v1 1.0 |
 | `narrator_2750`..`3750` | `the_narrator_v0_000002750.safetensors` .. `the_narrator_v0_000003750.safetensors`, `the_narrator_v1_000003250.safetensors` etc | `the_narrator` | Same as above, steps 2750-3750 | Narrator steps |
 | `void_v1` | `void_vision_v1.safetensors` | `void_vision` | Prefix `void_vision, ...` + world suffix | Void base |
 | `void_v4` | `void_vision_v4_000003250.safetensors` | `void_vision` | Prefix `void_vision, ...` + world suffix | Favorite void v4 |
 | `void_v3` | `void_vision_v3.safetensors` | `void_vision` | Prefix `void_vision, ...` + world suffix | Void v3 |
 | `luna_base` | `luna_art_lora.safetensors` | `luna_art` | Prefix `luna_art, ...` + world suffix | Luna base |
-| `luna_v2_3000` | `luna_art_v2_000003000.safetensors` | `luna_art` | Prefix `luna_art, ...` + world suffix | Maps to user `luna_art_v3 3000` — only v2_3000 exists |
+| `luna_v2_3000` | `luna_art_v2_000003000.safetensors` | `luna_art` | Prefix `luna_art, ...` + world suffix | Luna v2 3000 — correct, v3 does not exist |
 | `luna_v2`.. | `luna_art_v2.safetensors` + `luna_art_v2_000002000`..`000003750` | `luna_art` | Same | Luna v2 steps |
 | `anime_like` | `illustration-1.0-qwen-image.safetensors` | `illustration` | `illustration, digital art` | Anime/illustration (closest to anime tag) |
 
@@ -60,7 +60,7 @@ Full 63 list via `search_models(folder=loras)` — 4 void, 9 narrator, 10 luna, 
 ```
 shiny holographic glow drawn sketch in a dark parallel digital glass like world many layers, deep, surreal, abstract, translucent, multiple dimension, fractal, deep, caleidoscope, layered, optical illusion, labyrinth, first person perspective, wide horizon, recursive, mandelbrot like, never ending, portals, optical illusion, peaceful, patterns, mandala, nature like, organic, trees
 ```
-plus variants: `paper sketch, pencil sketch, digital art, layered art` (short forms). Agent should blend: trigger prefix + user subject + optional suffix fragments, not overwrite user intent verbatim. For `the_narrator`, always include character phrase `the young man wearing glasses` AFTER all triggers (triggers first, then description).
+plus variants: `paper sketch, pencil sketch, digital art, layered art` (short forms). Agent should blend: trigger prefix + user subject + optional suffix fragments, not overwrite user intent verbatim. For `the_narrator`, default descriptive is `the young man wearing glasses` added AFTER triggers only when narrator lora is used and user provided no custom appearance; no extra details (hair/eye) injected by default.
 
 ## Resolutions
 
@@ -100,7 +100,7 @@ Clone `templates/z_image_turbo_api_base.json` → edit → write to `/tmp/` ONLY
 
 * `13.width/height` per resolution, `13.batch_size 1`
 * `27.text` = **constructed prompt**: `trigger_prefix + user_prompt` (+ `optional_suffix` ONLY if user explicitly requests world/style)
-  * `trigger_prefix` = comma-join triggers in chain order, e.g. `the_narrator, luna_art` (or `pencil sketch,` etc). Descriptive phrase `the young man wearing glasses` comes AFTER all triggers, not interspersed (triggers first). If user prompt is empty and no loras, `27.text` must stay empty string — do NOT inject holographic filler.
+  * `trigger_prefix` = comma-join triggers in chain order, e.g. `the_narrator, luna_art` (or `pencil sketch,` etc). Descriptive phrase `the young man wearing glasses` comes AFTER all triggers when narrator is active (not interspersed), and only as default — omit if user provided alternative appearance. If user prompt is empty and no loras, `27.text` must stay empty string — do NOT inject holographic filler.
   * `optional_suffix` = holographic world fragments ONLY on explicit request (user says `holographic`/`glass world`/`mandala`/`labyrinth` or asks for that style). Never auto-append. When not requested, suffix = empty. When requested, use short fragment `, shiny holographic glow ...` etc limited to 2-4 keywords, not full paragraph.
 * `3.seed` = random or user seed, `11.model` = last lora `MODEL` or `["28",0]` if 0 loras, `27.clip` = last lora `CLIP` or `["30",1]`
 * Insert N `LoraLoader` nodes `51+` with filenames + weights (see templates/z_image_turbo_lora_2_example.json)
