@@ -1,0 +1,230 @@
+{
+  "version": 2,
+  "meta": {
+    "description": "Consolidated refs embedded \u2014 24 thumbs in references/ (ben/peterson/chris). Visual-diff validation compares text size/pos/color vs ref stats. Allowed palette only, pink never. No outer border.",
+    "last_updated": "2026-08-25",
+    "sources": [
+      "Ben Ungeskriptet (long-form, arrow/pink-block lesson)",
+      "Dr Jordan B Peterson Clips (per-word orange/blue italic + bottom plate)",
+      "ChrisWillx Modern Wisdom (centered quote, cyan/gold + dual faces)"
+    ],
+    "allowed_palette": [
+      "#0A0A0A black",
+      "#0F172A dark navy",
+      "#1A1A2E dark plum",
+      "#D4AF37 gold",
+      "#B8941F old gold",
+      "#FFD600 yellow",
+      "#FF7B2E orange",
+      "#2E86AB heavenly marine blue",
+      "#0EA5E9 sky blue",
+      "#6D28D9 violet",
+      "#140028 deep violet"
+    ],
+    "forbidden_palette": [
+      "#E85D7A pink/coral as used in Ben ref \u2014 convert to gold #D4AF37 or marine #2E86AB"
+    ]
+  },
+  "base": {
+    "label": "Base \u2014 allowed palette, heavy condensed sans",
+    "layout": {
+      "resolution": "1280x720",
+      "subject": "right 50%",
+      "text_area": "left 40% clean or center 60% or bottom 70% per style",
+      "text_pos": "x=4% y=8% (top) or y=62% (bottom) \u2014 style defined",
+      "line_height": 0.82,
+      "max_lines": 3,
+      "max_words_total": 5
+    },
+    "typography": {
+      "case": "uppercase",
+      "align": "left",
+      "weight": "900",
+      "tracking": "-1.5%",
+      "line_height": 0.82,
+      "scale_head": 1.35,
+      "scale_sub": 1.0
+    },
+    "color": {
+      "fill": "#FFFFFF",
+      "stroke": "#000000",
+      "stroke_outer": 4,
+      "stroke_inner": 0,
+      "shadow_offset": "4px down-right duplicate #000",
+      "subtitle_bg": "rgba(0,0,0,0.75)",
+      "subtitle_text": "#FFFFFF"
+    },
+    "effect": {
+      "shadow": "4px duplicate offset, not halo",
+      "outer_border": "none \u2014 removed per user request, no frame surrounding entire image"
+    }
+  },
+  "references": {
+    "ben_dark_gold": {
+      "label": "Ben lesson \u2192 dark + gold (allowed)",
+      "inherits": "base",
+      "channel": "https://www.youtube.com/@ungeskriptet (lesson only, pink\u2192gold)",
+      "use_when": "German interview / telos witches \u2014 needs Ben packing + authority, but telos palette",
+      "typography": {
+        "head_font": "Anton-Regular.ttf",
+        "fallbacks": [
+          "Oswald-Variable.ttf",
+          "BebasNeue-Regular.ttf"
+        ],
+        "weight": "900",
+        "tracking": "-1.5%",
+        "line_height": 0.82,
+        "scale_head": 1.35,
+        "scale_sub": 0.95,
+        "description": "Ultra-bold condensed (Anton), hyphen split allowed STEUER- / TRICKS, 2-3 lines fill 55% width, last line on solid block"
+      },
+      "color": {
+        "fill": "#FFFFFF",
+        "stroke": "#000000",
+        "stroke_outer": 4,
+        "shadow": "4px duplicate #000",
+        "highlight_block": "#D4AF37 gold (replaces Ben pink #E85D7A)",
+        "highlight_text": "#0A0A0A black on gold OR #FFFFFF on gold with 2px black duplicate",
+        "background": "#1A1A2E dark plum / #0F172A marine dark",
+        "outer_border": "none \u2014 user: no surrounding frame/border on entire image"
+      },
+      "layout": {
+        "text_area": "left 58% top y=8%",
+        "text_pos": "x=4% y=8%",
+        "subject": "right 42% close-up headphones/mic, face untouched",
+        "arrow": "optional white curved arrow 3-4px to subject eye",
+        "underline": "white grunge brush 4px under highlight block"
+      },
+      "rules": [
+        "Last line highlight block full width left 58% (gold), text on it black or white with thin duplicate",
+        "Thin duplicate shadow not halo stroke \u2014 keeps 168px legibility",
+        "NO outer border/frame \u2014 user forbids surrounding frame"
+      ]
+    },
+    "peterson_heavenly": {
+      "label": "Peterson Clips lesson \u2192 heavenly/marine + orange on black plate",
+      "inherits": "base",
+      "channel": "https://www.youtube.com/@DrJordanBPetersonClips",
+      "use_when": "Bottom heavy truth \u2014 telos narrow path, 10 MIN A DAY style",
+      "typography": {
+        "head_font": "Anton-Regular.ttf",
+        "fallbacks": [
+          "Oswald-Variable.ttf",
+          "BebasNeue-Regular.ttf"
+        ],
+        "weight": "900",
+        "tracking": "-1.2%",
+        "line_height": 0.85,
+        "scale_head": 1.25,
+        "per_word": [
+          "white #FFFFFF",
+          "orange #FF7B2E",
+          "heavenly #2E86AB italic OR #38BDF8"
+        ],
+        "description": "Bottom plate 2-3 lines, per-word highlight: urgency=orange, emotion=heavenly blue italic"
+      },
+      "color": {
+        "fill": "#FFFFFF",
+        "accent_orange": "#FF7B2E",
+        "accent_heavenly": "#38BDF8",
+        "accent_gold": "#D4AF37",
+        "stroke_outer": 3,
+        "plate": "rgba(0,0,0,0.85) behind text",
+        "underline": "#FFFFFF 2px between lines",
+        "outer_border": "none \u2014 user: no surrounding frame/border on entire image"
+      },
+      "layout": {
+        "text_area": "bottom-left 70% width, y=62%",
+        "text_pos": "x=4% y=62%",
+        "subject": "right 50% Peterson close, background painting/photo left"
+      },
+      "rules": [
+        "Per-word coloring: 1-2 words orange or heavenly blue italic per line, not all same",
+        "White rule line between lines",
+        "NO outer border/frame \u2014 user forbids surrounding frame"
+      ]
+    },
+    "chris_heavenly": {
+      "label": "ChrisWillx lesson \u2192 centered heavenly/gold quote",
+      "inherits": "base",
+      "channel": "https://www.youtube.com/@ChrisWillx",
+      "use_when": "Centered quote middle \u2014 telos epigraph, biology limits style",
+      "typography": {
+        "head_font": "Anton-Regular.ttf",
+        "fallbacks": [
+          "Montserrat-Variable.ttf",
+          "Oswald-Variable.ttf"
+        ],
+        "weight": "900",
+        "tracking": "-1%",
+        "line_height": 0.88,
+        "scale_head": 1.25,
+        "centered": true,
+        "quote_marks": "\u201c \u201d 120px",
+        "description": "Center x=50% y=35%, 3 lines centered, punchword heavenly #2E86AB or gold #D4AF37 20% larger, underline"
+      },
+      "color": {
+        "fill": "#FFFFFF",
+        "accent_heavenly": "#2E86AB",
+        "accent_gold": "#D4AF37",
+        "accent_violet": "#6D28D9",
+        "stroke_outer": 3,
+        "background": "#0F172A marine dark navy",
+        "underline": "#2E86AB 3px",
+        "outer_border": "none \u2014 user: no surrounding frame/border on entire image"
+      },
+      "layout": {
+        "text_area": "center 60% x=20% y=30%",
+        "text_pos": "x=50% center anchor",
+        "subject": "two faces left 25% + right 25% framing center text, or single centered",
+        "attribution": "small white 28px centered below underline"
+      },
+      "rules": [
+        "Centered, not left \u2014 host left, guest right, text middle",
+        "NO outer border/frame \u2014 keep image edge clean"
+      ]
+    },
+    "ben_ungeskriptet_ref": {
+      "label": "REF ONLY \u2014 Ben pink (do not use, lesson)",
+      "inherits": "base",
+      "note": "Pink #E85D7A block is reference lesson for highlight block geometry \u2014 convert to gold #D4AF37 in output",
+      "color": {
+        "highlight_block_ref": "#E85D7A pink \u2014 forbidden, use #D4AF37 gold",
+        "outer_border_ref": "#E85D7A 8px \u2014 convert to #D4AF37 or #0F172A"
+      }
+    },
+    "luna_art": {
+      "label": "Luna Art \u2014 violet holographic (telos dark mystical)",
+      "inherits": "base",
+      "color": {
+        "fill": "#FFFFFF",
+        "stroke": "#140028",
+        "stroke_outer": 4,
+        "highlight_block": "#6D28D9 violet 80% opacity",
+        "outer_border": "none \u2014 user: no surrounding frame/border on entire image"
+      }
+    }
+  },
+  "map": {
+    "how_to_add": "Copy ben_dark_gold / peterson_heavenly / chris_heavenly block, change 2-3 keys within allowed_palette. Pink never.",
+    "allowed_palette_hex": [
+      "#FFFFFF",
+      "#0A0A0A",
+      "#D4AF37",
+      "#B8941F",
+      "#FFD600",
+      "#FF7B2E",
+      "#2E86AB",
+      "#0EA5E9",
+      "#38BDF8",
+      "#6D28D9",
+      "#140028",
+      "#0F172A",
+      "#1A1A2E"
+    ],
+    "contrast": {
+      "shared_core": "Anton 900 condensed, duplicate thin shadow 4px not halo, 2-3 lines fill 55-70% width, NO outer border/frame, readable 168px",
+      "ben_vs_peterson_vs_chris": "Ben top-left gold block 1 line highlight + arrow; Peterson bottom plate per-word orange/heavenly + white rule; Chris centered heavenly/gold highlight + dual faces + quote marks"
+    }
+  }
+}

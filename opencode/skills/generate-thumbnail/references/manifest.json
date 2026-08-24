@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "updated": "2026-08-25",
+  "purpose": "Consolidated reference material — all kept inspo after garbage deletion. Used for visual-diff validation in batch_critique. No pink output; typography lessons only, palette mapped to allowed: dark/black/gold/marine/heavenly/violet/orange/yellow.",
+  "counts": {"ben": 6, "peterson": 3, "peterson_clips": 7, "chris": 8, "total": 24},
+  "channels": {
+    "ben": {"handle": "@ungeskriptet", "channel_id": "UCjkSqbf8E4MybdYmfhlW10A", "style": "ben_dark_gold", "traits": "left 58% top y=8% Anton 900, last line gold block #D4AF37, white on gold duplicate shadow 4px, brush underline, left 58% width, not pink #E85D7A"},
+    "peterson": {"handle": "@JordanBPeterson", "channel_id": "UCL_f53ZEJxp8TtlOkHwMV9Q", "style": "peterson_heavenly", "traits": "bottom-left plate rgba 0.85, per-word orange #FF7B2E + heavenly #38BDF8 italic, white rule 2px, Anton, bottom y=62%"},
+    "peterson_clips": {"handle": "@DrJordanBPetersonClips", "style": "peterson_heavenly", "traits": "same as peterson, 2-3 lines 10 MIN A DAY scale"},
+    "chris": {"handle": "@ChrisWillx", "style": "chris_heavenly", "traits": "centered quote 60% width, heavenly #2E86AB highlight, cyan underline 3px, top/bottom not needed, dual faces framing"}
+  },
+  "allowed_palette": ["#FFFFFF white", "#0A0A0A black", "#D4AF37 gold", "#FFD600 yellow", "#FF7B2E orange", "#2E86AB heavenly marine", "#38BDF8 sky", "#6D28D9 violet", "#140028 deep violet", "#0F172A dark marine"],
+  "forbidden": ["#E85D7A pink block/border — reference only, convert to gold"],
+  "validation_stats": {
+    "ben_text_fill_ratio": 0.55,
+    "ben_last_block_ratio": 0.58,
+    "peterson_plate_ratio": 0.7,
+    "chris_center_ratio": 0.6,
+    "font_scale_reference": 1.35,
+    "stroke_outer_ref": 4,
+    "tracking_ref": "-1.5%",
+    "168px_line_height_ref": 50
+  },
+  "files": [
+    "ben/ben_3hfOQeS9zBI.jpg", "ben/ben_8DTCgjiBgV4.jpg", "ben/ben_9J-oOOLwba4.jpg", "ben/ben_NuhZihgD3SQ.jpg", "ben/ben_RwVHaOAfEUM.jpg", "ben/ung_-vS4mMSCYHk.jpg",
+    "peterson/pet_BSfHwiR7I24.jpg", "peterson/petmain_0cC5VLyaXFo.jpg", "peterson/petmain_BSfHwiR7I24.jpg",
+    "peterson_clips/petclip_0R_K8B_V_NM.jpg", "peterson_clips/petclip_DIRYBHNGuTc.jpg", "peterson_clips/petclip_GXPXet55rcg.jpg", "peterson_clips/petclip_GXPXet55rcg.jpg", "peterson_clips/petclip_KKuCDQ35muc.jpg", "peterson_clips/petclip_vyTfI4FRn5A.jpg", "peterson_clips/petclip_XOev-o4YPM4.jpg",
+    "chris/chris_4dIgq-efQpY.jpg", "chris/chris_edbIJ7PpVlc.jpg", "chris/chris_f2p1YH0-BaI.jpg", "chris/chris_Lc8to_uMHVw.jpg", "chris/chris_mSjaMyP5QjY.jpg", "chris/chris_PXzAhouG2xA.jpg", "chris/chris_Qz-YXd_C_d4.jpg", "chris/chris_SNrw-C_RBck.jpg"
+  ]
+}

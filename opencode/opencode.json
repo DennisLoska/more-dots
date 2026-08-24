@@ -91,7 +91,8 @@
     "external_directory": {
       "~/work/**": "allow",
       "~/.config/opencode/**": "allow",
-      "/tmp/**": "allow"
+      "/tmp/**": "allow",
+      "/run/user/1000/gvfs/**": "allow"
     },
     "doom_loop": "ask"
   },
@@ -105,15 +106,6 @@
       "url": "https://mcp.context7.com/mcp",
       "enabled": true
     },
-    "caveman-shrink": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "caveman-shrink"
-      ],
-      "enabled": true
-    },
     "filesystem": {
       "type": "local",
       "command": [
@@ -121,7 +113,8 @@
         "-y",
         "@modelcontextprotocol/server-filesystem",
         "/home/dennis/work",
-        "/tmp"
+        "/tmp",
+        "/run/user/1000/gvfs"
       ],
       "enabled": true
     },
@@ -134,6 +127,16 @@
         "--executablePath",
         "/usr/bin/chromium"
       ],
+      "enabled": true
+    },
+    "comfy-mcp": {
+      "type": "local",
+      "command": [
+        "/home/dennis/.local/share/mise/installs/python/3.13.12/bin/comfy-mcp"
+      ],
+      "env": {
+        "COMFY_BIN": "/home/dennis/.local/share/mise/installs/python/3.13.12/bin/comfy"
+      },
       "enabled": true
     }
   },

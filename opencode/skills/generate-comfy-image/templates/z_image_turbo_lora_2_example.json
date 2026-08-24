@@ -1,0 +1,142 @@
+{
+  "28": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "z_image_turbo_bf16.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "30": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_3_4b.safetensors",
+      "type": "lumina2",
+      "device": "default"
+    }
+  },
+  "29": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "51": {
+    "class_type": "LoraLoader",
+    "inputs": {
+      "model": [
+        "28",
+        0
+      ],
+      "clip": [
+        "30",
+        0
+      ],
+      "lora_name": "the_narrator_v1_000003000.safetensors",
+      "strength_model": 1.0,
+      "strength_clip": 1.0
+    }
+  },
+  "52": {
+    "class_type": "LoraLoader",
+    "inputs": {
+      "model": [
+        "51",
+        0
+      ],
+      "clip": [
+        "51",
+        1
+      ],
+      "lora_name": "luna_art_v2_000003000.safetensors",
+      "strength_model": 0.75,
+      "strength_clip": 0.75
+    }
+  },
+  "27": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "52",
+        1
+      ],
+      "text": "the_narrator, luna_art, the young man wearing glasses, close up portrait shot of a young man wearing glasses positioned on the right hand side of the thumbnail, face and small part of upper body visible, eyes normal, intense gaze, cinematic lighting, left side empty clean area for typography no text no letters, thumbnail composition with strong left text area, background shiny holographic glow drawn sketch in a dark parallel digital glass like world many layers deep surreal abstract translucent multiple dimensions fractal kaleidoscope layered optical illusion labyrinth first person perspective wide horizon recursive mandelbrot like never ending portals peaceful mandala patterns nature organic trees, layered art, paper sketch, high detail, 16:9"
+    }
+  },
+  "33": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": [
+        "27",
+        0
+      ]
+    }
+  },
+  "11": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "52",
+        0
+      ],
+      "shift": 3.0
+    }
+  },
+  "13": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1280,
+      "height": 720,
+      "batch_size": 1
+    }
+  },
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "11",
+        0
+      ],
+      "positive": [
+        "27",
+        0
+      ],
+      "negative": [
+        "33",
+        0
+      ],
+      "latent_image": [
+        "13",
+        0
+      ],
+      "seed": 42,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "res_multistep",
+      "scheduler": "simple",
+      "denoise": 1.0
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "29",
+        0
+      ]
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ],
+      "filename_prefix": "transhumanismus-narrator-luna"
+    }
+  }
+}
