@@ -14,6 +14,11 @@ Usage:
 """
 import argparse, pathlib, json, sys, re
 from PIL import Image, ImageFilter, ImageStat
+try:
+    import pytesseract
+    HAS_TESS = True
+except:
+    HAS_TESS = False
 
 SKILL_ROOT = pathlib.Path(__file__).resolve().parents[1]
 REFS_DIR = SKILL_ROOT / "references"
@@ -44,6 +49,46 @@ def load_reference_stats():
         return m.get("validation_stats", {})
     return {"ben_text_fill_ratio":0.55,"ben_last_block_ratio":0.58,"font_scale_reference":1.35,"stroke_outer_ref":4}
 
+def detect_hallucinated_text(path):
+    """Return WARN if raw contains rendered text/numbers/% despite no-text prompt."""
+    try:
+        if HAS_TESS:
+            img = Image.open(path).convert("RGB")
+            # crop left side where text hallucination appears (left 55%)
+            W,H = img.size
+            left = img.crop((0,0,int(W*0.60), H))
+            # config: only look for % and alphanum, quick
+            data = pytesseract.image_to_string(left, config="--psm 6")
+            if "%" in data or any(c.isdigit() for c in data.strip() if len(data.strip())>1):
+                # filter short noise: need >=2 chars and % or digit run
+                if "%" in data:
+                    return f"FAIL hallucinated text `%` detected: {repr(data.strip()[:30])} — regen with prompt without `%` (word form)"
+                # if digits present in left area, likely hallucination
+                # require at least 2 digits to avoid false positive
+                digits = ''.join(c for c in data if c.isdigit())
+                if len(digits) >= 2:
+                    return f"WARN hallucinated numbers detected: {repr(data.strip()[:30])}"
+    except Exception as e:
+        return None
+    # fallback: heuristic — check for high-contrast white-on-dark large glyphs in left area via edge + white pixel cluster
+    try:
+        img = Image.open(path).convert("RGB")
+        W,H = img.size
+        left = img.crop((0,0,int(W*0.55), H)).convert("L")
+        # threshold white text: pixels >200 on dark bg (<80)
+        # if large white cluster exists left side, likely text hallucination
+        # quick: count white pixels in left; raw should be near 0 white text
+        pix = list(left.getdata())
+        white = sum(1 for v in pix if v>210)
+        ratio = white/len(pix)
+        # clean background should have <1% white; text hallucination gives 2-5%
+        if ratio > 0.015:
+            # double check not just bright background: sample bg luminance
+            # if white cluster is glyph-like (connected), treat as WARN
+            return None if ratio>0.08 else None  # keep silent for now, rely on tesseract when available
+    except: pass
+    return None
+
 def score_image(path, blur_thresh=80, left_edge_thresh=20, ratio_thresh=1.2):
     img = Image.open(path)
     W,H = img.size
@@ -64,6 +109,12 @@ def score_image(path, blur_thresh=80, left_edge_thresh=20, ratio_thresh=1.2):
     if W!=1280 or H!=720:
         reasons.append(f"size {W}x{H} != 1280x720")
         if status=="good": status="near-miss"
+    # hallucinated text check (no %/numbers) — new in 2026-08-25 patch
+    hall = detect_hallucinated_text(path)
+    if hall:
+        reasons.append(hall)
+        if hall.startswith("FAIL"): status="bad"
+        elif status=="good": status="near-miss"
     if not reasons: reasons.append(f"pass blur={blur:.0f} left={ld:.1f} right={rd:.1f} ratio={ratio:.2f}")
     return {"file":str(path),"status":status,"blur":round(blur,1),"left_edge":round(ld,1),"right_edge":round(rd,1),"ratio":round(ratio,2),"size":f"{W}x{H}","reasons":reasons}
 

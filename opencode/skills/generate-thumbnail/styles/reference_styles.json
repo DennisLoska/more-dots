@@ -29,8 +29,8 @@
     "label": "Base \u2014 allowed palette, heavy condensed sans",
     "layout": {
       "resolution": "1280x720",
-      "subject": "right 50%",
-      "text_area": "left 40% clean or center 60% or bottom 70% per style",
+      "subject": "right side",
+      "text_area": "left side clean or center or bottom per style (word form, no %)",
       "text_pos": "x=4% y=8% (top) or y=62% (bottom) \u2014 style defined",
       "line_height": 0.82,
       "max_lines": 3,

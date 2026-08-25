@@ -41,7 +41,7 @@ Stored templates in this skill:
 | `pixel` | `pixel_art_style_z_image_turbo.safetensors` | `pixel art` | `pixel art, digital art, layered art` | Pixel art |
 | `classic` | `Classic_Painting_Z_Image_Turbo_v1_renderartist_1750.safetensors` | `classic painting` | `classic painting, layered art` | Classic painting |
 | `coloring` | `Coloring_Book_Z_Image_Turbo_v1_renderartist_2000.safetensors` | `coloring book` | `coloring book, paper sketch` | Coloring book |
-| `narrator_base` | `the_narrator_v0.safetensors` | `the_narrator` | Default when narrator used: add `the young man wearing glasses` AFTER triggers (only if narrator lora active and user gave no specific appearance — narrator not always wearing glasses, so no extra hair/eye details by default) | Primary narrator v0 base — user favorite |
+| `narrator_base` | `the_narrator_v0.safetensors` | `the_narrator` | Default when narrator used: add `a man` AFTER triggers (only if narrator lora active and user gave no specific appearance — no extra hair/eye details by default) | Primary narrator v0 base — user favorite |
 | `narrator_v1_3000` | `the_narrator_v1_000003000.safetensors` | `the_narrator` | Same, v1 3000 — maps to user "narrator 1.0" | Narrator v1 1.0 |
 | `narrator_2750`..`3750` | `the_narrator_v0_000002750.safetensors` .. `the_narrator_v0_000003750.safetensors`, `the_narrator_v1_000003250.safetensors` etc | `the_narrator` | Same as above, steps 2750-3750 | Narrator steps |
 | `void_v1` | `void_vision_v1.safetensors` | `void_vision` | Prefix `void_vision, ...` + world suffix | Void base |
@@ -54,13 +54,15 @@ Stored templates in this skill:
 
 Full 63 list via `search_models(folder=loras)` — 4 void, 9 narrator, 10 luna, 6 turbo styles. Avoid non-ZImage loras (`wan2.2_*`, `ltx2.3*`) for this workflow.
 
-**Trigger keywords are mandatory — prepend FIRST to prompt (comma-separated) before any other text, in lora chain order.** E.g. chain `narrator_v1_3000 + luna_v2_3000` → prompt starts `the_narrator, luna_art, the young man wearing glasses, ...`.
+**Trigger keywords are mandatory — prepend FIRST to prompt (comma-separated) before any other text, in lora chain order.** E.g. chain `narrator_v1_3000 + luna_v2_3000` → prompt starts `the_narrator, luna_art, a man, ...`.
+
+**Person rule (MANDATORY):** If `the_narrator` NOT in chain, prompt must contain `no person, no human, no face, no body` and must NOT contain `a man` or portrait framing. Use abstract landscape (e.g. `pixel art, abstract pixel art landscape`, `luna_art, shiny holographic glow fractal labyrinth`, `void_vision, dark void abstract landscape`, `abstract surreal landscape` for nolora). When `the_narrator` present, append `a man` AFTER triggers and add portrait framing `extreme close-up portrait of a man on right side, left side empty clean area`.
 
 **Holographic world suffix** — for these 3 custom loras (and usually pencil/pixel/classic), typical prompt tail is layered world description. Use as *background guidance*, not forced every time, but agent should know style:
 ```
 shiny holographic glow drawn sketch in a dark parallel digital glass like world many layers, deep, surreal, abstract, translucent, multiple dimension, fractal, deep, caleidoscope, layered, optical illusion, labyrinth, first person perspective, wide horizon, recursive, mandelbrot like, never ending, portals, optical illusion, peaceful, patterns, mandala, nature like, organic, trees
 ```
-plus variants: `paper sketch, pencil sketch, digital art, layered art` (short forms). Agent should blend: trigger prefix + user subject + optional suffix fragments, not overwrite user intent verbatim. For `the_narrator`, default descriptive is `the young man wearing glasses` added AFTER triggers only when narrator lora is used and user provided no custom appearance; no extra details (hair/eye) injected by default.
+plus variants: `paper sketch, pencil sketch, digital art, layered art` (short forms). Agent should blend: trigger prefix + user subject + optional suffix fragments, not overwrite user intent verbatim. For `the_narrator`, default descriptive is `a man` added AFTER triggers only when narrator lora is used and user provided no custom appearance; no extra details injected by default. **When narrator absent, never add person descriptive — use no-person abstract instead.**
 
 ## Resolutions
 
@@ -85,7 +87,7 @@ Default `720p` = `1280x720` `batch_size 1`. Map:
 * Use `LoraLoader` (Model and CLIP) — not `LoraLoaderModelOnly`. Verified via `nodes(get=LoraLoader)`.
 * Prefer canonical filename with `.safetensors` suffix.
 * Weights outside 0.1-1.9 warn but allow.
-* Composition: triggers in chain order must match node order. Example validated: `51 the_narrator_v1_000003000 1.0 → 52 luna_art_v2_000003000 0.75` with prompt prefix `the_narrator, luna_art, the young man wearing glasses, ...` — this ordering is what `templates/z_image_turbo_lora_2_example.json` demonstrates.
+* Composition: triggers in chain order must match node order. Example validated: `51 the_narrator_v1_000003000 1.0 → 52 luna_art_v2_000003000 0.75` with prompt prefix `the_narrator, luna_art, a man, ...` — this ordering is what `templates/z_image_turbo_lora_2_example.json` demonstrates.
 
 ## Agent Workflow
 
@@ -99,8 +101,9 @@ Call `search_models(folder=loras)` to verify filenames exist if unsure. Map user
 Clone `templates/z_image_turbo_api_base.json` → edit → write to `/tmp/` ONLY:
 
 * `13.width/height` per resolution, `13.batch_size 1`
-* `27.text` = **constructed prompt**: `trigger_prefix + user_prompt` (+ `optional_suffix` ONLY if user explicitly requests world/style)
-  * `trigger_prefix` = comma-join triggers in chain order, e.g. `the_narrator, luna_art` (or `pencil sketch,` etc). Descriptive phrase `the young man wearing glasses` comes AFTER all triggers when narrator is active (not interspersed), and only as default — omit if user provided alternative appearance. If user prompt is empty and no loras, `27.text` must stay empty string — do NOT inject holographic filler.
+* `27.text` = **constructed prompt**: `trigger_prefix + person_phrase + user_prompt` (+ `optional_suffix` ONLY if user explicitly requests world/style)
+  * `trigger_prefix` = comma-join triggers in chain order, e.g. `the_narrator, luna_art` (or `pencil sketch,` etc).
+  * `person_phrase` = `a man` + portrait framing `extreme close-up portrait of a man on right side, left side empty clean area for typography` ONLY when `the_narrator` in chain (user can override appearance). When `the_narrator` NOT in chain, person_phrase = `no person, no human, no face, no body, empty scene, abstract landscape` — never add `a man`.
   * `optional_suffix` = holographic world fragments ONLY on explicit request (user says `holographic`/`glass world`/`mandala`/`labyrinth` or asks for that style). Never auto-append. When not requested, suffix = empty. When requested, use short fragment `, shiny holographic glow ...` etc limited to 2-4 keywords, not full paragraph.
 * `3.seed` = random or user seed, `11.model` = last lora `MODEL` or `["28",0]` if 0 loras, `27.clip` = last lora `CLIP` or `["30",1]`
 * Insert N `LoraLoader` nodes `51+` with filenames + weights (see templates/z_image_turbo_lora_2_example.json)
@@ -113,7 +116,12 @@ Write to: `/tmp/zimage_<seed>.json` (single) or `/tmp/zimage_batch_<seed>.json` 
 
 Prompt assembly example (2 loras, current directory renders):
 ```
-the_narrator, luna_art, the young man wearing glasses, a lone figure at a glass horizon at night
+the_narrator, luna_art, a man, extreme close-up portrait of a man on right side, left side empty clean area for typography, a lone figure at a glass horizon at night
+→ workflow /tmp/zimage_1001.json → fetch to ./renders/<prompt_id>_000.png
+```
+No-person example (no narrator):
+```
+pixel art, abstract pixel art landscape, layered digital art, no person, no human, no face, no body, empty scene, left side empty clean area for typography, no text
 → workflow /tmp/zimage_1001.json → fetch to ./renders/<prompt_id>_000.png
 ```
 
@@ -134,7 +142,7 @@ Loop mode: this workflow is loop-safe — `/tmp/` files are unique per iteration
 
 Example batch 20 (current dir renders, no cwd spam):
 ```
-prompt "the_narrator, luna_art, the young man wearing glasses, close up portrait ... Transhumanismus ..." 
+prompt "the_narrator, luna_art, a man, close up portrait ... Transhumanismus ..." 
 loras [{"name":"the_narrator_v1_000003000","weight":1.0},{"name":"luna_art_v2_000003000","weight":0.75}]
 resolution 1280x720 steps 8 cfg 1
 → clone templates/z_image_turbo_api_base.json → 20× write /tmp/zimage_batch_1001..1020.json (seed varied, LoraLoader chain 51→52) → validate one → 20× run_workflow(wait=False) → 20× fetch_outputs to ./renders
@@ -171,7 +179,7 @@ prompt "narrator luna blend cinematic" loras [
   {"name":"luna_art_v2_000003000","weight":0.75}
 ] resolution 720p
 → chain 51 1.0 → 52 0.75 in /tmp/zimage_batch_*.json → fetch to ./renders
-→ final CLIP text: "the_narrator, luna_art, the young man wearing glasses, narrator luna blend cinematic" (suffix only if requested)
+→ final CLIP text: "the_narrator, luna_art, a man, narrator luna blend cinematic" (suffix only if requested)
 ```
 
 **No lora 1080p:**
@@ -194,6 +202,7 @@ prompt "high contrast thumbnail bold text area" loras [] resolution 1080p
 * Do not use `apply_slots` to add loras — cannot create nodes.
 * Do not set `batch_size >1` for multi-variant — loop distinct `/tmp/` files/runs.
 * Do not chain wan/ltx loras on ZImage.
+* Do not include `%` or numeric percentages in prompt for layout — use `right side`/`left side` word form; `%` hallucinates as text (e.g. `50%`) despite `no text`.
 * Do not overwrite same workflow JSON while jobs queued — use distinct `/tmp/` files per seed.
 
 ## Templates in this skill

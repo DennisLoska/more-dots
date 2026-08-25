@@ -1,6 +1,6 @@
 ---
 name: generate-thumbnail
-description: Generate high-contrast YouTube thumbnails of the narrator (young man wearing glasses) via generate-comfy-image. Uses narrator + style loras (void vision, luna art, pixel art, pencil, classic), composes loras correctly, adds vector text overlay post-diffusion, and loops with image critique until 3 good thumbnails exist. Use when user wants thumbnail, youtube thumb, narrator thumb, or "myself + style".
+description: Generate high-contrast YouTube thumbnails of the narrator (a man) via generate-comfy-image. Uses narrator + style loras (void vision, luna art, pixel art, pencil, classic), composes loras correctly, adds vector text overlay post-diffusion, and loops with image critique until 3 good thumbnails exist. Use when user wants thumbnail, youtube thumb, narrator thumb, or "myself + style".
 ---
 
 # generate-thumbnail Skill
@@ -10,7 +10,7 @@ Wrapper over `generate-comfy-image` for YouTube thumbnails. Fixes two failures s
 ## When to use
 
 * User says `thumbnail`, `youtube thumb`, `thumb of myself/narrator`, `narrator + <style>` (void vision, luna art, pixel art, pencil, classic, coloring, anime), or any style from `generate-comfy-image` registry.
-* Map: `myself`/`me`/`narrator` → `the_narrator` (default `the young man wearing glasses` AFTER triggers only when narrator used and no custom description — not always wearing glasses). Styles: `void`→`void_vision`, `luna`→`luna_art`, `pixel`→`pixel art`, `pencil`→`pencil sketch`, `classic`→`classic painting`, etc. If unknown style, `search_models(folder=loras)` then map.
+* Map: `myself`/`me`/`narrator` → `the_narrator` (default `a man` AFTER triggers only when narrator used and no custom description). Styles: `void`→`void_vision`, `luna`→`luna_art`, `pixel`→`pixel art`, `pencil`→`pencil sketch`, `classic`→`classic painting`, etc. If unknown style, `search_models(folder=loras)` then map.
 
 ## Depends on
 
@@ -19,11 +19,12 @@ Wrapper over `generate-comfy-image` for YouTube thumbnails. Fixes two failures s
 
 ## Thumbnail Spec (enforced)
 
-* Layout: 16:9 `1280x720` (default thumb) — subject on **right 50%**, **left 40% negative space** clean for text (no clutter, no generated text). `batch_size 1`.
+* Layout: 16:9 `1280x720` (default thumb) — subject on **right side**, **left side negative space** clean for text (no clutter, no generated text, no numbers, no symbols). `batch_size 1`.
 * Framing: extreme close-up portrait, face + small upper chest only, eye-level, sharp focus on face, no full body, no second person, no drawing/sketch artifact.
-* Narrator: `the_narrator` + default `the young man wearing glasses` AFTER triggers when narrator active (only if user gave no specific appearance) — brown hair, glasses. Eyes normal by default. **Optional eye effect** only if user explicitly requests `terminator`/`cybernetic`/`red eye`: then `subject's right eye (screen-left, viewer's left side of his face) glowing bright red Terminator cybernetic (circular, emissive), left eye normal dark` — and must be correct side. Do NOT add red eye unless requested.
+* Narrator: `the_narrator` + default `a man` AFTER triggers when narrator active (only if user gave no specific appearance). Eyes normal by default. **Optional eye effect** only if user explicitly requests `terminator`/`cybernetic`/`red eye`: then `subject's right eye (screen-left, viewer's left side of his face) glowing bright red Terminator cybernetic (circular, emissive), left eye normal dark` — and must be correct side. Do NOT add red eye unless requested.
+* Person rule (MANDATORY): If `the_narrator` NOT in lora chain, image must contain **NO PERSON** — no human, no face, no body. Prompt must include `no person, no human, no face, no body, empty scene` and must NOT contain `a man` or `portrait`. Use abstract landscape prompt instead: e.g. `pixel art, abstract pixel art landscape`, `luna_art, shiny holographic glow fractal labyrinth portal`, `void_vision, dark void surreal abstract landscape`, or `abstract surreal landscape` for nolora. When `the_narrator` IS present, use portrait prompt `extreme close-up portrait of a man on right side, left side empty clean area for typography, blank wall, sharp focus, eye-level`.
 * Background: clean/neutral by default. Holographic world suffix `shiny holographic glow ... fractal labyrinth portal mandala` ONLY if user explicitly requests `luna/holographic/glass world` style. Otherwise use simple `neutral background` or keep empty. Do not pollute empty prompt with mandala filler.
-* Text: **NOT in diffusion**. Prompt contains `left side empty clean area for typography, no text, no watermark, no letters`. Text added post as vector overlay on left.
+* Text: **NOT in diffusion**. Prompt contains `left side empty clean area for typography, blank wall, no text, no watermark, no letters, no numbers, no symbols, no percentage`. Text added post as vector overlay on left. **NEVER use `%` or numbers for layout in prompt** (e.g. `50%`, `40%` hallucinate as rendered text) — use words `right side`, `left side`.
 * Style intensity via lora weights (see Experiment).
 
 ## Lora Composition (delegates to generate-comfy-image)
@@ -34,14 +35,14 @@ Wrapper over `generate-comfy-image` for YouTube thumbnails. Fixes two failures s
   * 1 lora: `51` with `strength_model=strength_clip=weight`
   * 2 loras: `51→52` (e.g. narrator 1.0 → luna 0.75), `27.clip ["52",1]`, `11.model ["52",0]`
   * 3 loras: `51→52→53` — lower weights to avoid bleed (e.g. 1.0→0.7→0.4, sum <1.8)
-* Triggers: always prepend in chain order, e.g. `the_narrator, luna_art` then default descriptive `the young man wearing glasses` AFTER triggers only when narrator used (user can override, not always wearing glasses). Example 2-lora: `the_narrator, luna_art, the young man wearing glasses, <thumb prompt>` → nodes 51 luna? No, order matters — ensure chain and prefix match.
+* Triggers: always prepend in chain order, e.g. `the_narrator, luna_art` then default descriptive `a man` AFTER triggers only when narrator used (user can override). Example 2-lora: `the_narrator, luna_art, a man, <thumb prompt>` → nodes 51 luna? No, order matters — ensure chain and prefix match.
 
 ## Text Overlay (post-diffusion, mandatory)
 
 Diffusion never renders `Transhumanismus` fractured again. Steps:
 
 * Generate text-free image to `./renders/thumb_raw_<id>.png` via `fetch_outputs(prompt_id, out_dir="./renders")`
-* Overlay vector text on left 40%: use `hyperframes` HTML or `PIL`/`ffmpeg`. Preferences:
+* Overlay vector text on left side: use `hyperframes` HTML or `PIL`/`ffmpeg`. Preferences:
   * Style: very large, contrast-rich, bold print, `Transhumanismus` left-aligned, hyphen optional, black or white with subtle drop shadow for contrast depending on background luminance (sample left area). Font size ~1/3 height.
   * Position: left `x=5%` `y=15%` stacked, `line-height 0.9`, keep subject face unobstructed.
   * Save final as `./renders/thumb_final_<id>.png` or `./thumbnails/thumb_final_<id>.png` in current dir. Keep raw for comparison.
@@ -73,7 +74,7 @@ This skill **loops adversarially** — generate more than requested, pick best, 
 
 Run `scripts/batch_critique.py --dir renders` adversarially — strict:
 
-* [ ] Subject on right 50%, left 40% clean (edge_density ratio)
+* [ ] Subject on right side, left side clean (edge_density ratio — no `%` in prompt, use word form)
 * [ ] Extreme close-up, sharp focus `blur >80`
 * [ ] Background clean left vs right, no watermark/letters
 * Score `good / near-miss / bad` with reason. **Rank all R candidates by (good > near-miss > bad, then blur desc, left/right ratio asc). Pick top F (3) best.** If <F good, still pick best near-miss — adversarial: we generate more to avoid bad.
@@ -126,7 +127,11 @@ User: `generate thumbnail of myself with luna art, text Transhumanismus`
 
 User: `generate thumbnail with void vision and pixel art`
 
-→ 3-lora chain `narrator 1.0 → void 0.75 → pixel 0.5` triggers `the_narrator, void_vision, pixel art, the young man wearing glasses, ...` (triggers first, then description) → same loop until 3 good.
+→ 3-lora chain `narrator 1.0 → void 0.75 → pixel 0.5` triggers `the_narrator, void_vision, pixel art, a man, ...` (triggers first, then description) → same loop until 3 good.
+
+User: `generate pixel art thumbnail without narrator (no person)`
+
+→ 1-lora `pixel art 0.8` trigger `pixel art, abstract pixel art landscape, layered digital art, no person, no human, no face, no body, empty scene, no text, left side empty clean area` — **NO** `a man`, **NO** portrait. Same loop until 3 good.
 
 ## Anti-patterns
 
@@ -137,6 +142,7 @@ User: `generate thumbnail with void vision and pixel art`
 * Do not stop after one batch — loop with critique until 3 good.
 * Do not ignore eye side when terminator requested — explicitly `subject's right eye (screen-left)`; check each image visually. If no eye effect requested, verify both eyes normal.
 * Do not change resolution to fix style — vary weights/prompts instead.
+* Do not include `%` or numeric percentages in diffusion prompt — always use word form `right side`/`left side` to avoid hallucinated `50%` text.
 * Do not use `ben_dark_gold` to get yellow text — ben is white on gold block `#D4AF37`; for yellow text `#FFD600` use `base --per-word "WORD:yellow"` (e.g. `OVERCOMING` white + `PERFECTIONISM:yellow`).
 * Long words >12 letters (e.g. PERFECTIONISM) overflow ben block `0.52*W` — use `base` per-word yellow instead of block.
 * Do not edit `overlay_helper.py` / skill files at runtime to fix style — choose correct style instead.
