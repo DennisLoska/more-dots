@@ -92,7 +92,8 @@
       "~/work/**": "allow",
       "~/.config/opencode/**": "allow",
       "/tmp/**": "allow",
-      "/run/user/1000/gvfs/**": "allow"
+      "/run/user/1000/gvfs/**": "allow",
+      "/proc/**": "allow"
     },
     "doom_loop": "ask"
   },
