@@ -24,7 +24,7 @@ digraph oneshot {
 
     "Phase 1: BRAINSTORM\nbrainstorming skill" [fillcolor=lightblue];
     "Phase 2: PLAN\nwriting-plans skill" [fillcolor=lightblue];
-    "Phase 3: EXECUTE\nsubagent-driven-development\n+ using-git-worktrees\n+ test-driven-development" [fillcolor=lightgreen];
+    "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development" [fillcolor=lightgreen];
     "Phase 4: VERIFY\nverification-before-completion" [fillcolor=lightyellow];
     "Phase 5: PR\nrequesting-code-review" [fillcolor=lightsalmon];
     "Phase 6: REVIEW\nreceiving-code-review" [fillcolor=lightsalmon];
@@ -37,13 +37,13 @@ digraph oneshot {
     "Escalate to user" [shape=box, fillcolor=red];
 
     "Phase 1: BRAINSTORM\nbrainstorming skill" -> "Phase 2: PLAN\nwriting-plans skill";
-    "Phase 2: PLAN\nwriting-plans skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ using-git-worktrees\n+ test-driven-development";
-    "Phase 3: EXECUTE\nsubagent-driven-development\n+ using-git-worktrees\n+ test-driven-development" -> "Systematic debugging needed?";
+    "Phase 2: PLAN\nwriting-plans skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development";
+    "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development" -> "Systematic debugging needed?";
     "Systematic debugging needed?" -> "systematic-debugging skill" [label="yes"];
-    "systematic-debugging skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ using-git-worktrees\n+ test-driven-development" [label="fixed"];
+    "systematic-debugging skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development" [label="fixed"];
     "Systematic debugging needed?" -> "Parallel work?" [label="no"];
     "Parallel work?" -> "dispatching-parallel-agents skill" [label="yes"];
-    "dispatching-parallel-agents skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ using-git-worktrees\n+ test-driven-development";
+    "dispatching-parallel-agents skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development";
     "Parallel work?" -> "Phase 4: VERIFY\nverification-before-completion" [label="no"];
     "Phase 4: VERIFY\nverification-before-completion" -> "Phase 5: PR\nrequesting-code-review";
     "Phase 5: PR\nrequesting-code-review" -> "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green";
@@ -101,21 +101,20 @@ After loading, follow DESIGN checklist it provides. Includes:
 
 ## Phase 3: EXECUTE
 
-**Sub-skills:** `using-git-worktrees`, `test-driven-development`
+**Sub-skills:** `test-driven-development`
 **Error routing:** `systematic-debugging`
 
 ### ⚠️ MANDATORY: Load Execution Skills
 
 You MUST invoke via `skill` tool:
 - `subagent-driven-development` — dispatch pattern, keeps main context clean
-- `using-git-worktrees` — isolated workspace per task
 - `test-driven-development` — TDD workflow
 
-All three are required. No inline execution path.
+Both are required. No inline execution path.
 
 ### Execution (subagent-driven, context-clean)
 
-1. Invoke `using-git-worktrees` to set up isolated workspace/branch. Standing preference: solo run (one agent, clean `git status`, feature branch) works in place, no linked worktree. Create a worktree only for 2+ agents in the same repo, a dirty checkout, or explicit request.
+1. Work in place on feature branch. Ensure clean `git status`, create feature branch if needed. No worktrees.
 2. For each task in plan: dispatch via `task` tool as fresh subagent (type: general or explore as needed)
 3. Each subagent follows TDD: write failing test → implement → pass
 4. Two-stage review after each task completes

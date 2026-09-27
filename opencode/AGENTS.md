@@ -160,10 +160,11 @@ Diff/branch/file reviewer. One line per finding `path:line: emoji severity: prob
 ### @cavecrew-builder
 Surgical 1-2 file editor. Typo fixes, single-function rewrites, mechanical renames. Max 2 files. No new abstractions.
 
-## Communication - No Explain/Visualize Prompts
+## Communication - No Follow-up Offers
 
-- NEVER ask if user wants current work explained or visualized in browser.
-- Complete task, report result terse. Stop there.
+- NEVER ask user if they want work explained, visualized, mocked in HTML, or shown in browser. No exceptions.
+- Banned phrases: "want me to explain", "want a visual", "want HTML mockup", "shall I show in browser", any variant.
+- After task: report result terse. Stop. No question. No offer.
 
 Every PR created via `gh` MUST use a pretty markdown body. Never leave the default one-liner.
 
