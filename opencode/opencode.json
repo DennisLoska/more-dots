@@ -65,6 +65,13 @@
       "url": "https://mcp.context7.com/mcp",
       "enabled": true
     },
+    "linear": {
+      "type": "remote",
+      "url": "https://mcp.linear.app/mcp",
+      "oauth": false,
+      "headers": { "Authorization": "Bearer {env:LINEAR_API_KEY}" },
+      "enabled": true
+    },
     "filesystem": {
       "type": "local",
       "command": [
