@@ -209,3 +209,15 @@ prompt "high contrast thumbnail bold text area" loras [] resolution 1080p
 * `templates/z_image_turbo_api_base.json` — flat API base, 0 loras, 1280x720, steps 8. Clone to `/tmp/` for all runs.
 * `templates/z_image_turbo_lora_2_example.json` — same base with `the_narrator_v1_000003000 1.0 → luna_art_v2_000003000 0.75` chain (proven 2026-08-24 for Transhumanismus thumb). Copy to `/tmp/` and vary seed.
 * Future: add `templates/z_image_turbo_frontend_subgraph.json` if subgraph preference needed (from `fetch_template image_z_image_turbo` → save to `/tmp/` then move to templates).
+
+
+## Telos Extension (when used inside telos repo)
+
+When this skill runs inside the telos project (`scripts/content-library/` exists), after `fetch_outputs` the agent MUST also save to `~/content_library`:
+
+```bash
+bun run scripts/content-library/batch-metadata.ts --file <outPath> --filetype image --prompt "<prompt>" --model z_image_turbo --style <preset>
+bun run scripts/content-library/batch-embeddings.ts --single <stem>
+```
+
+Sidecar `.<stem>.metadata.json` in `~/content_library/image/` (or video/text) with keys `job_id, created_at, filename, filetype, resolution, title, description, tags, prompt, model, style` matching existing `~/content_library/image/.*.metadata.json` samples. Uses `scripts/content-library/lib.ts` helpers, `CONTENT_LIBRARY_DIR` default `~/content_library`. Outside telos, skip. Verify: `ls ~/content_library/image/<stem>*` + `curl "http://127.0.0.1:3002/api/library/search?q=<word>&filetype=image&limit=5"`.

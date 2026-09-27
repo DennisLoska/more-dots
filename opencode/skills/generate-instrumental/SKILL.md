@@ -80,3 +80,10 @@ Local skill `telos-instrumental` (`.opencode/skills/telos-instrumental/SKILL.md`
 * ACE `lyrics` must stay `[instrumental]` — never inject vocals.
 * Output is `mp3 V0` from `SaveAudioMP3`; for `wav` use `SaveAudio` variant (not in base, convert via `ffmpeg -i bgm.mp3 bgm.wav` or helper `--to wav`).
 * VRAM: `system_stats` vram_free check before long 180s+; call `free_memory` if needed.
+
+
+## Content Library for Audio (Telos)
+
+If generating audio inside telos and content_library integration desired, treat audio as `video` or `text` per filetype mapping (mp3 → video fallback or text). Save via:
+`bun run scripts/content-library/batch-metadata.ts --file <audioPath> --filetype video --prompt "<prompt>" --model stable_audio --style <style>`
+then embed via `batch-embeddings.ts`. This ensures sidecar parity, though primary use is image/video.

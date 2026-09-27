@@ -206,3 +206,15 @@ Loop: Generate → RAW critique → overlay with style → visual-diff final →
 **Fonts bundled:** `fonts/BebasNeue-Regular.ttf` 60K + `Anton-Regular.ttf` 167K + `Montserrat-Variable.ttf` 728K + `Oswald-Variable.ttf` 169K — local dep, no yay, checked via PIL.
 
 
+
+
+## Telos Extension (when used inside telos repo)
+
+When this skill runs inside the telos project (`scripts/content-library/` exists), after `fetch_outputs` the agent MUST also save to `~/content_library`:
+
+```bash
+bun run scripts/content-library/batch-metadata.ts --file <outPath> --filetype image --prompt "<prompt>" --model z_image_turbo --style <style>
+bun run scripts/content-library/batch-embeddings.ts --single <stem>
+```
+
+Sidecar `.<stem>.metadata.json` in `~/content_library/image/` with same keys as existing samples (`job_id, created_at, filename, filetype, resolution, title, description, tags, prompt, model, style`). Verify via `ls ~/content_library/image/<stem>*` + `curl "http://127.0.0.1:3002/api/library/search?q=<word>&filetype=image&limit=5"`.

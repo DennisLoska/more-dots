@@ -16,8 +16,12 @@ Auto-Clarity: drop caveman for security warnings, irreversible actions, user con
 Boundaries: code/commits/PRs written normal.
 <!-- caveman-end -->
 
-## Writing Style
-- NEVER use emdash character (Unicode U+2014) in any chat response or when writing code. Use hyphen (-), comma, colon, or period instead. Applies to prose, comments, strings, and docs unless user explicitly requests emdash.
+## Writing Style - No Emdash Ever
+
+- HARD BAN: NEVER output emdash character (Unicode U+2014, "—") in ANY context - chat, code, comments, strings, docs, file edits, commit messages. No exceptions unless user explicitly writes "use emdash" in current request, and even then confirm first.
+- ALWAYS use hyphen (-), comma, colon, or period instead.
+- BEFORE every write/edit/output: mentally scan for "—" and replace. If you typed "—", you failed - fix before sending.
+- Self-check: if text contains "—", rewrite immediately. Treat as lint error, not style preference.
 
 ## Verification Protocol
 
@@ -41,6 +45,10 @@ Red flags - never say these:
 - `cavecrew-investigator` (`task` `subagent_type: cavecrew-investigator`): read-only locator, compressed `file:line` table, no snippets, no fix suggestions. Use for "where is X defined", "what calls Y", "list all uses of Z", fast maps. ~60% smaller than `explore`.
 - `explore` (`task` `subagent_type: explore`): thorough reader, `file:line` + code blocks + env values + interaction graphs. Use when need full snippets, dep chains, planning context.
 - Main never loops `rg`/`fd`/`read` directly - subagent output compressed keeps main lean for long sessions.
+
+## Process Management - Port-Targeted Restarts Only
+
+When restarting app for debugging/dev, never kill all bun or node processes (`pkill bun`, `killall node`, `pkill -f node`, etc.). Kill only process on specific port (`fuser -k PORT/tcp`, `lsof -ti:PORT | xargs kill`, etc.). Broad kills nuke unrelated services.
 
 ## Security & Boundaries
 
