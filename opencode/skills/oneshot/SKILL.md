@@ -77,7 +77,7 @@ After loading, follow DESIGN checklist it provides. Includes:
 1. Follow brainstorming skill checklist exactly
 2. Present design to user, get approval
 3. Write spec to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
-4. Commit spec: `git add docs/superpowers/specs/ && git commit -m "docs: spec for [topic]"`
+4. Commit spec ONLY if not gitignored: `git check-ignore -q <spec-file> && echo "spec local-only, skip commit" || git add <spec-file> && git commit -m "docs: spec for [topic]"`. NEVER `git add -f` an ignored path.
 5. Proceed to Phase 2
 
 ---
@@ -93,7 +93,7 @@ After loading, follow DESIGN checklist it provides. Includes:
 ### Execution
 
 1. Follow writing-plans skill checklist exactly
-2. Save plan to `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`, commit
+2. Save plan to `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`. Commit ONLY if not gitignored: `git check-ignore -q <plan-file> && echo "plan local-only, skip commit" || git add <plan-file> && git commit -m "docs: plan for [feature]"`. NEVER `git add -f` an ignored path.
 3. Execution mode is **Subagent-Driven Development only** (keeps main context clean). Do NOT offer inline execution.
 4. Proceed to Phase 3
 
@@ -115,7 +115,7 @@ All three are required. No inline execution path.
 
 ### Execution (subagent-driven, context-clean)
 
-1. Invoke `using-git-worktrees` to set up isolated workspace/branch
+1. Invoke `using-git-worktrees` to set up isolated workspace/branch. Standing preference: solo run (one agent, clean `git status`, feature branch) works in place, no linked worktree. Create a worktree only for 2+ agents in the same repo, a dirty checkout, or explicit request.
 2. For each task in plan: dispatch via `task` tool as fresh subagent (type: general or explore as needed)
 3. Each subagent follows TDD: write failing test → implement → pass
 4. Two-stage review after each task completes
@@ -161,7 +161,7 @@ All three are required. No inline execution path.
 ### Execution
 
 1. Push branch to remote
-2. Create PR with summary, test plan, linked spec
+2. Create PR with summary, test plan, linked spec (if spec was gitignored and local-only, reference it by path as local file instead of a repo link)
 3. Save PR URL
 4. Request review from configured reviewers
 
@@ -261,6 +261,7 @@ On completion: `memory add "oneshot completed: [task] on [branch]"`
 - Continue past unfixable error without user escalation
 - Proceed to FINISH on FAIL review or red tests
 - Exceed 5 review rounds without escalation
+- Commit a gitignored file via `git add -f` (check `git check-ignore` before staging spec/plan)
 
 **Always:**
 - Load every required skill via `skill` tool

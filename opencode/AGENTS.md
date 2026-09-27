@@ -160,6 +160,24 @@ Diff/branch/file reviewer. One line per finding `path:line: emoji severity: prob
 ### @cavecrew-builder
 Surgical 1-2 file editor. Typo fixes, single-function rewrites, mechanical renames. Max 2 files. No new abstractions.
 
+## Communication - No Explain/Visualize Prompts
+
+- NEVER ask if user wants current work explained or visualized in browser.
+- Complete task, report result terse. Stop there.
+
+Every PR created via `gh` MUST use a pretty markdown body. Never leave the default one-liner.
+
+Required structure:
+- `## Summary` - 1-2 sentences, what and why
+- `## Changes` - bullet list, bold file/area names, backtick paths
+- `## Test plan` - checklist with `[x]`/`[ ]`, exact commands run plus result
+
+Rules:
+- Write in normal language (no caveman compression in PR bodies).
+- No emdash character anywhere (global ban still applies).
+- Avoid the word `delete` (any case) inside `gh` commands: the `gh *delete*` permission rule blocks execution. Use remove/trim/drop instead. This applies to the command text, including `--delete-branch` flags and body text passed on the same command line.
+- For `gh pr edit` body updates, pass the body inline and keep it free of that word.
+
 ## Definition of Done
 
 Before marking complete, verify ALL that apply:
