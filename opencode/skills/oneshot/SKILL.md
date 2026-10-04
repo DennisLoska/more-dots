@@ -9,6 +9,8 @@ Autonomous end-to-end SDLC: task → spec → plan → implementation → verifi
 
 **Core principle:** Full autonomy once started. No pauses between phases. User consulted only at design approval, plan approval, and final branch decision.
 
+**Auto-approve bypass:** If initial `/oneshot` task description explicitly says auto-approve everything (or equivalent: "skip all approvals", "no approval gates", "full autonomy no questions"), skip all 3 approval gates. Record `auto-approve: true` plus quoted trigger phrase at top of spec, then proceed through design, plan, and finish without asking. User instruction overrides default gates.
+
 **Announce at start:** "Oneshot pipeline starting for: [task description]"
 
 **Context hygiene:** This skill is subagent-driven. Main session orchestrates phases 1-2-4-5-6-7 directly (need user interaction), but Phase 3 EXECUTE is fully delegated to subagents via `task` tool. Main never writes implementation code inline.
@@ -75,7 +77,7 @@ After loading, follow DESIGN checklist it provides. Includes:
 ### Execution
 
 1. Follow brainstorming skill checklist exactly
-2. Present design to user, get approval
+2. Present design to user, get approval (skip if auto-approve bypass active, note `auto-approved` in spec)
 3. Write spec to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
 4. Commit spec ONLY if not gitignored: `git check-ignore -q <spec-file> && echo "spec local-only, skip commit" || git add <spec-file> && git commit -m "docs: spec for [topic]"`. NEVER `git add -f` an ignored path.
 5. Proceed to Phase 2
@@ -94,8 +96,9 @@ After loading, follow DESIGN checklist it provides. Includes:
 
 1. Follow writing-plans skill checklist exactly
 2. Save plan to `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`. Commit ONLY if not gitignored: `git check-ignore -q <plan-file> && echo "plan local-only, skip commit" || git add <plan-file> && git commit -m "docs: plan for [feature]"`. NEVER `git add -f` an ignored path.
-3. Execution mode is **Subagent-Driven Development only** (keeps main context clean). Do NOT offer inline execution.
-4. Proceed to Phase 3
+3. Present plan to user, get approval (skip if auto-approve bypass active)
+4. Execution mode is **Subagent-Driven Development only** (keeps main context clean). Do NOT offer inline execution.
+5. Proceed to Phase 3
 
 ---
 
@@ -184,17 +187,23 @@ Reviewer subagent assumes code is broken. Must try to find bugs, not confirm qua
 
 > You are adversarial reviewer. Assume implementation has bugs. Check: spec compliance, edge cases, error handling, security, performance, test coverage, diff vs plan, hidden regressions. Output `PASS` only if zero blocking issues. Otherwise `FAIL` + findings as `path:line: 🔴 bug: ...` / `🟡 risk: ...` + concrete fix. Be strict.
 
-### Execution — Loop (≤5 rounds)
+### Execution — Loop (≤5 rounds, NEVER stops on FAIL)
 
 ```
 round = 1..5:
   1. Dispatch reviewer subagent via `task` tool (fresh context, reads spec + plan + diff + runs tests if present)
      Reviewer outputs: PASS or FAIL + findings, plus tests status (green/red/ no-tests)
   2. Run verification: `tests` (if existent) must be green. `lint`/`typecheck`/`build` if applicable. Record result.
-  3. Decision:
+  3. Decision (NO STOPPING ON FAIL — the loop NEVER pauses, reports intermediate results,
+     asks the user what to do, or presents options mid-loop):
      - if PASS && tests green (or no tests but reviewer PASS + build green) → break loop, proceed to Phase 7
-     - if FAIL or tests red → dispatch fix subagent(s) via `task` (type: general/cavecrew-builder, 1-2 files max per subagent) to address ALL findings, push fix, round++
+     - if FAIL or tests red and round < 5 → IMMEDIATELY dispatch fix subagent(s) via `task`
+       (type: general/cavecrew-builder, 1-2 files max per subagent) to address ALL findings,
+       push fix, round++. This happens automatically in the same turn chain. A FAIL round is
+       never a stopping point, never a user report, never a question — it is only the trigger
+       for the next fix + re-review cycle.
   4. If round == 5 and still FAIL/red → escalate to user with: round count, last review findings, test output, diff summary. Do NOT proceed to Phase 7. Await user decision (force-merge / more fixes / discard).
+     Round-5 escalation is the ONLY user contact the loop permits before PASS+green.
 ```
 
 ### Rules
@@ -202,6 +211,8 @@ round = 1..5:
 - Each round uses fresh subagents: reviewer never fixes, fixer never reviews (separation of concerns).
 - Fixer must run tests before declaring done; main verifies green.
 - No skipping rounds. No early FINISH on FAIL.
+- FAIL/red is NEVER a stopping point: never pause, never report findings to the user, never ask what to do, never present mid-loop options. Fix + re-review starts immediately, every time, rounds 1-4.
+- The ONLY permitted user contact before PASS+green is round-5 escalation.
 - If no test suite exists: reviewer PASS + build/lint green suffices, but reviewer must flag `no tests` as 🟡 risk.
 - Max 5 rounds enforced — 6th round is escalation, not auto-loop.
 
@@ -226,7 +237,7 @@ Opencode has no native adversarial-review-loop primitive. Supported via composit
 ### Execution
 
 1. Verify tests pass on final state
-2. Present merge options to user:
+2. Present merge options to user (skip if auto-approve bypass active, default to keep branch plus PR URL):
    - Option 1: Merge locally
    - Option 2: PR already created (provide URL)
    - Option 3: Keep branch as-is
@@ -253,12 +264,13 @@ On completion: `memory add "oneshot completed: [task] on [branch]"`
 **Never:**
 - Skip phases (all 7 required)
 - Proceed without loading phase required skill(s)
-- Proceed without user approval on design and plan
+- Proceed without user approval on design and plan (unless auto-approve bypass active)
 - Merge without verification
 - Skip test-driven development
 - Ignore verification failures
 - Continue past unfixable error without user escalation
 - Proceed to FINISH on FAIL review or red tests
+- Stop, pause, report findings, ask the user what to do, or present options after a FAIL/red round (rounds 1-4) instead of auto-continuing fix → re-review
 - Exceed 5 review rounds without escalation
 - Commit a gitignored file via `git add -f` (check `git check-ignore` before staging spec/plan)
 
@@ -275,7 +287,7 @@ On completion: `memory add "oneshot completed: [task] on [branch]"`
 - **Full autonomy:** Execute all phases without pausing between them
 - **Artifact-based resume:** Prior phase artifacts (spec/plan) are truth for resume
 - **Error-hardened:** Route problems to systematic-debugging before escalating
-- **User consulted at 3 gates only:** design, plan choice, final branch decision
+- **User consulted at 3 gates only:** design, plan choice, final branch decision (skipped entirely under auto-approve bypass)
 - **Subagents for implementation:** fresh context per task, no pollution — main session stays lean
 - **Context-clean guarantee:** All code execution via `task` subagents; main only holds spec/plan/PR state
 - **TDD always:** subagents write failing test before production code
