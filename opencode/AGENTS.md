@@ -54,8 +54,15 @@ Red flags - never say these:
 
 When restarting app for debugging/dev, never kill all bun or node processes (`pkill bun`, `killall node`, `pkill -f node`, etc.). Kill only process on specific port (`fuser -k PORT/tcp`, `lsof -ti:PORT | xargs kill`, etc.). Broad kills nuke unrelated services.
 
+## Browser - User URLs vs DevTools
+
+- User asks to open ticket, website, URL for viewing: use `xdg-open "<url>"` (background, disowned). Opens in user's existing default browser with session.
+- NEVER use chrome-devtools `new_page`/`navigate_page` just to show user a page. That spawns isolated automation Chromium, no user cookies, hits login walls.
+- Reserve chrome-devtools plugin for development only: snapshots, console messages, network requests, screenshots, performance traces, element interaction during debugging.
+
 ## Security & Boundaries
 
+- NEVER commit to main or master directly (no `git commit` on main/master, no push to them) unless user explicitly says so in current session. Work always happens on a ticket/feature branch; merging happens via PR.
 - NEVER read `.env`, `.env.*` (except `.env.example`), `.zshrc`, `.zsh_history`
 - NEVER printenv, sudo, or access secrets
 - NEVER gh delete, gh org, gh secret operations

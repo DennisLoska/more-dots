@@ -69,7 +69,9 @@
       "type": "remote",
       "url": "https://mcp.linear.app/mcp",
       "oauth": false,
-      "headers": { "Authorization": "Bearer {env:LINEAR_API_KEY}" },
+      "headers": {
+        "Authorization": "Bearer {env:LINEAR_API_KEY}"
+      },
       "enabled": true
     },
     "filesystem": {
@@ -105,6 +107,12 @@
         "COMFY_BIN": "/home/dennis/.local/share/mise/installs/python/3.13.12/bin/comfy"
       },
       "enabled": true
+    },
+    "sentry": {
+      "type": "remote",
+      "url": "https://mcp.sentry.dev/mcp/dennis-loska",
+      "enabled": true,
+      "oauth": {}
     }
   },
   "provider": {
