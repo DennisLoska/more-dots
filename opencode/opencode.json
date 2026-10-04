@@ -34,26 +34,9 @@
     "lsp": "allow",
     "skill": "allow",
     "task": "allow",
-    "bash": {
-      "*": "allow",
-      "printenv": "deny",
-      "sudo *": "deny",
-      "git clean *": "deny",
-      "git reset *": "deny",
-      "git restore *": "deny",
-      "git branch -d *": "deny",
-      "git branch -D *": "deny",
-      "git branch --delete *": "deny",
-      "gh *delete*": "deny",
-      "gh *DELETE*": "deny",
-      "gh *Delete*": "deny",
-      "gh org *": "deny",
-      "gh secret *": "deny",
-      "rm *": "deny",
-      "rm -rf*": "deny"
-    },
+    "bash": "allow",
     "external_directory": "allow",
-    "doom_loop": "deny"
+    "doom_loop": "allow"
   },
   "instructions": [
     "AGENTS.md",
