@@ -67,6 +67,7 @@ When restarting app for debugging/dev, never kill all bun or node processes (`pk
 - NEVER printenv, sudo, or access secrets
 - NEVER gh delete, gh org, gh secret operations
 - NEVER rm -rf anything
+- NEVER rm with a wildcard (`*`) in `~/content_library` or any media dir (enforced: opencode.json denies `rm *content_library*`, `rm -rf *`, `rm -r *`). Deletions there are exact filenames only after `ls` verification, or via the app's own prune flow. A cleanup helper that computes filenames must still delete by exact path, one by one.
 - ALWAYS ask before installing npm/bun packages
 - External directory access: `~/work/**`, `~/.config/opencode/**`, `/tmp/**` are always allowed
 
