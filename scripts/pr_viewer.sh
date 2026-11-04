@@ -9,7 +9,11 @@ fi
 URL=$(gh pr view "$BRANCH" --json url --jq ".url")
 
 if [[ "$URL" == *"http"* ]]; then
-  xdg-open "$URL"
+  if command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$URL"
+  else
+    open "$URL"
+  fi
   echo "$URL"
   exit 1
 fi
