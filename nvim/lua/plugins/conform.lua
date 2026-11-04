@@ -14,19 +14,20 @@ return {
 	},
 	opts = {
 		formatters_by_ft = {
-			-- Prefer local prettier (from node_modules) over prettierd (requires node in PATH)
-			javascript = { "prettier", stop_after_first = true },
-			javascriptreact = { "prettier", stop_after_first = true },
-			typescript = { "prettier", stop_after_first = true },
-			typescriptreact = { "prettier", stop_after_first = true },
-			vue = { "prettier", stop_after_first = true },
-			css = { "prettier", stop_after_first = true },
-			scss = { "prettier", stop_after_first = true },
-			html = { "prettier", stop_after_first = true },
-			json = { "prettier", stop_after_first = true },
-			jsonc = { "prettier", stop_after_first = true },
-			yaml = { "prettier", stop_after_first = true },
-			graphql = { "prettier", stop_after_first = true },
+			-- Prefer local prettier (from node_modules), then mason prettierd (Mac has
+		-- prettierd only), then plain prettier.
+			javascript = { "prettierd", "prettier", stop_after_first = true },
+			javascriptreact = { "prettierd", "prettier", stop_after_first = true },
+			typescript = { "prettierd", "prettier", stop_after_first = true },
+			typescriptreact = { "prettierd", "prettier", stop_after_first = true },
+			vue = { "prettierd", "prettier", stop_after_first = true },
+			css = { "prettierd", "prettier", stop_after_first = true },
+			scss = { "prettierd", "prettier", stop_after_first = true },
+			html = { "prettierd", "prettier", stop_after_first = true },
+			json = { "prettierd", "prettier", stop_after_first = true },
+			jsonc = { "prettierd", "prettier", stop_after_first = true },
+			yaml = { "prettierd", "prettier", stop_after_first = true },
+			graphql = { "prettierd", "prettier", stop_after_first = true },
 			lua = { "stylua" },
 			python = { "black" },
 			go = { "gofumpt", "goimports" },
@@ -58,6 +59,20 @@ return {
 			}
 		end,
 		formatters = {
+			prettierd = {
+				command = function()
+					-- Prefer system prettierd, fall back to mason's (Mac install)
+					local system_path = vim.fn.exepath("prettierd")
+					if system_path ~= "" then
+						return system_path
+					end
+					local mason_path = vim.fn.expand("~/.local/share/nvim/mason/bin/prettierd")
+					if vim.uv.fs_stat(mason_path) then
+						return mason_path
+					end
+					return "prettierd"
+				end,
+			},
 			prettier = {
 				-- Use local node_modules prettier if available and supports --stdin-filepath (v3).
 				-- Prettier v4 alpha removed stdin support, so we must detect and skip it.

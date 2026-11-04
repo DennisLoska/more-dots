@@ -1,15 +1,17 @@
-# coding in style
+# theme 
 theme = tokyonight
-background = #07070a
+
+# fancy background settings
+background = #070709
 background-opacity = 0.9
 background-blur-radius = 20
 
-# my eyes!
+# my eyes!!!
 font-size = 16
 
-# optional: bonus meta key
-macos-option-as-alt = false
-
-#  keybindings
+# custom keybindings
 keybind = super+shift+j=previous_tab
 keybind = super+shift+k=next_tab
+
+# tux
+macos-option-as-alt = false
