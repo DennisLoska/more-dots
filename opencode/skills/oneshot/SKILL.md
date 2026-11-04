@@ -1,23 +1,23 @@
 ---
 name: oneshot
-description: Use when user invokes /oneshot with a complete task description, or says "oneshot" followed by a feature/bugfix request. Runs entire SDLC pipeline autonomously. NOT for single-step tasks, questions, or tasks needing human judgment per step.
+description: Use when user says "oneshot" followed by a complete task description, or a feature/bugfix request phrased as "oneshot build X". Runs the entire SDLC pipeline autonomously. NOT for single-step tasks, questions, or tasks needing human judgment per step.
 ---
 
 # Oneshot Pipeline
 
-Autonomous end-to-end SDLC: task → spec → plan → implementation → verification → PR → merge.
+Autonomous end-to-end SDLC: task -> spec -> plan -> implementation -> verification -> PR -> CI watch -> council consensus -> land.
 
-**Core principle:** Full autonomy once started. No pauses between phases. User consulted only at design approval, plan approval, and final branch decision.
+**Core principle:** Full autonomy once started. No pauses between phases. User consulted only at design approval (Gate 1), plan approval (Gate 2), and the final branch decision (Gate 3).
 
-**Auto-approve bypass:** If initial `/oneshot` task description explicitly says auto-approve everything (or equivalent: "skip all approvals", "no approval gates", "full autonomy no questions"), skip all 3 approval gates. Record `auto-approve: true` plus quoted trigger phrase at top of spec, then proceed through design, plan, and finish without asking. User instruction overrides default gates.
+**Auto-approve bypass:** If the initial task description explicitly asks for it ("auto-approve", "skip all approvals", "no approval gates", "full autonomy no questions"), skip all 3 gates. Record `auto-approve: true` plus the quoted trigger phrase at the top of the spec. User instruction at start overrides default gates. Later turns never override it.
 
 **Announce at start:** "Oneshot pipeline starting for: [task description]"
 
-**Visibility:** This pipeline runs in the main session - the user watches every phase live. Announce each phase transition as you enter it, and summarize each subagent's result back in main as it returns.
+**Visibility:** The whole pipeline runs in the main session. Announce every phase transition. Stream every subagent result back into main as it returns.
 
-**Context hygiene:** Main session orchestrates phases 1-2-4-5-6-7 directly (need user interaction); Phase 3 EXECUTE and Phase 6 review rounds dispatch per-task subagents via `task` tool. Main never writes implementation code inline, and NEVER delegates a whole phase or the whole pipeline to a subagent.
+**Context hygiene:** Main orchestrates. Main never writes implementation code inline. Per-task and per-round work is dispatched to fresh subagents via the `task` tool. Never delegate a whole phase or the whole pipeline to one subagent.
 
----
+**Model routing:** Skills never hardcode models. Role rows and fallback ladders live in AGENTS.md ("Model Tank"); every seat agent pins its primary in its agent file. On a usage-limit or 429-style provider error, re-dispatch the same seat agent with an explicit model override along that role's ladder and announce it.
 
 ## Pipeline Overview
 
@@ -26,277 +26,160 @@ digraph oneshot {
     rankdir=TB;
     node [shape=box, style=rounded];
 
-    "Phase 1: BRAINSTORM\nbrainstorming skill" [fillcolor=lightblue];
-    "Phase 2: PLAN\nwriting-plans skill" [fillcolor=lightblue];
-    "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development" [fillcolor=lightgreen];
-    "Phase 4: VERIFY\nverification-before-completion" [fillcolor=lightyellow];
-    "Phase 5: PR\nrequesting-code-review" [fillcolor=lightsalmon];
-    "Phase 6: REVIEW\nreceiving-code-review" [fillcolor=lightsalmon];
-    "Phase 7: FINISH\nfinishing-a-development-branch" [fillcolor=lightblue];
-
-    "Systematic debugging needed?" [shape=diamond];
-    "systematic-debugging skill" [fillcolor=orange];
-    "Parallel work?" [shape=diamond];
-    "dispatching-parallel-agents skill" [fillcolor=orange];
-    "Escalate to user" [shape=box, fillcolor=red];
-
-    "Phase 1: BRAINSTORM\nbrainstorming skill" -> "Phase 2: PLAN\nwriting-plans skill";
-    "Phase 2: PLAN\nwriting-plans skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development";
-    "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development" -> "Systematic debugging needed?";
-    "Systematic debugging needed?" -> "systematic-debugging skill" [label="yes"];
-    "systematic-debugging skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development" [label="fixed"];
-    "Systematic debugging needed?" -> "Parallel work?" [label="no"];
-    "Parallel work?" -> "dispatching-parallel-agents skill" [label="yes"];
-    "dispatching-parallel-agents skill" -> "Phase 3: EXECUTE\nsubagent-driven-development\n+ test-driven-development";
-    "Parallel work?" -> "Phase 4: VERIFY\nverification-before-completion" [label="no"];
-    "Phase 4: VERIFY\nverification-before-completion" -> "Phase 5: PR\nrequesting-code-review";
-    "Phase 5: PR\nrequesting-code-review" -> "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green";
-    "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green" -> "Phase 7: FINISH\nfinishing-a-development-branch" [label="PASS + green"];
-    "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green" -> "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green" [label="FAIL → fix → re-review (≤5)"];
-    "Phase 6: ADVERSARIAL REVIEW LOOP\nmax 5 rounds\nPASS + tests green" -> "Escalate to user" [label="5 rounds no PASS"];
-    "Systematic debugging needed?" -> "Escalate to user" [label="unfixable"];
+    "1 SHAPE\nshape skill" -> "2 PLAN\nplan skill";
+    "2 PLAN\nplan skill" -> "3 DISPATCH\ndispatch skill + tdd";
+    "3 DISPATCH" -> "4 VERIFY\nverify skill";
+    "4 VERIFY" -> "5 LAND attempt\nland skill: push + file PR";
+    "5 LAND attempt" -> "6.5 MAKE-CI-GREEN";
+    "6.5 MAKE-CI-GREEN" -> "6 COUNCIL\ncouncil skill, max 3 rounds";
+    "6 COUNCIL" -> "7 FINISH\nland skill gate 3" [label="consensus + green"];
+    "6 COUNCIL" -> "6 COUNCIL" [label="FAIL -> fix -> re-review"];
+    "6 COUNCIL" -> "Escalate" [label="escalation model still fails"];
+    "3 DISPATCH" -> "debug skill" [label="task broken"];
 }
 ```
 
-Run phases sequentially 1→7 in the main session. No skipping. Announce each phase when entering it. Validate prior phase artifact exists before proceeding.
+Run phases sequentially 1 -> 7 in the main session. No skipping. Validate the prior phase artifact exists before entering the next phase.
 
 ---
 
-## Phase 1: BRAINSTORM
+## Phase 1: SHAPE
 
-**Output:** `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+**Skill:** `shape`
+**Output:** `docs/specs/YYYY-MM-DD-<topic>-design.md` (spec)
 
-### ⚠️ MANDATORY: Load Brainstorming Skill
-
-**You MUST invoke the `brainstorming` skill via the `skill` tool now.** It provides checklist for design exploration, requirements gathering, architecture decisions. Without it you will miss required steps.
-
-After loading, follow DESIGN checklist it provides. Includes:
-- Understanding user needs
-- Exploring architecture options
-- Documenting design decisions
-- Getting user approval before writing spec
-
-### Execution
-
-1. Follow brainstorming skill checklist exactly
-2. Present design to user, get approval (skip if auto-approve bypass active, note `auto-approved` in spec)
-3. Write spec to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
-4. Commit spec ONLY if not gitignored: `git check-ignore -q <spec-file> && echo "spec local-only, skip commit" || git add <spec-file> && git commit -m "docs: spec for [topic]"`. NEVER `git add -f` an ignored path.
-5. Proceed to Phase 2
+1. Create the feature branch `feat/<topic>` if the tree sits on the default branch (master/main). This is the FIRST step, before the shape skill runs: shape writes and commits the spec, so the branch must exist before it runs. All pipeline commits after this point happen on a feature branch.
+2. Invoke the `shape` skill via the `skill` tool. Follow its Socratic design checklist: purpose, constraints, success criteria, 2-3 approaches with trade-offs, user-approved design. The shape skill writes and commits the spec onto that branch.
+3. Spec lands at `docs/specs/YYYY-MM-DD-<topic>-design.md`; commit only if not gitignored: `git check-ignore -q <spec-file> || git add <spec-file> && git commit -m "docs: spec for [topic]"`. Never `git add -f` an ignored path.
+4. Gate 1: user approves the design (skip under bypass, note `auto-approved` in spec).
 
 ---
 
 ## Phase 2: PLAN
 
-**Output:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+**Skill:** `plan`
+**Output:** `docs/plans/YYYY-MM-DD-<feature>.md` (implementation plan)
 
-### ⚠️ MANDATORY: Load Writing-Plans Skill
-
-**You MUST invoke the `writing-plans` skill via the `skill` tool now.** It contains decomposition checklist for breaking specs into executable tasks with file paths, dependencies, effort estimates. Without it plan will be unstructured.
-
-### Execution
-
-1. Follow writing-plans skill checklist exactly
-2. Save plan to `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`. Commit ONLY if not gitignored: `git check-ignore -q <plan-file> && echo "plan local-only, skip commit" || git add <plan-file> && git commit -m "docs: plan for [feature]"`. NEVER `git add -f` an ignored path.
-3. Present plan to user, get approval (skip if auto-approve bypass active)
-4. Execution mode is **Subagent-Driven Development only** (keeps main context clean). Do NOT offer inline execution.
-5. Proceed to Phase 3
+1. Invoke the `plan` skill via the `skill` tool. Decompose the spec into bite-size tasks with exact file paths, commands, and commit points. No placeholders.
+2. Save to `docs/plans/YYYY-MM-DD-<feature>.md`. Same gitignore-commit rule as the spec.
+3. Gate 2: user approves the plan (skip under bypass).
+4. Execution mode is subagent-driven only. Do not offer inline execution.
 
 ---
 
-## Phase 3: EXECUTE
+## Phase 3: DISPATCH
 
-**Sub-skills:** `test-driven-development`
-**Error routing:** `systematic-debugging`
+**Skills:** `dispatch` + `tdd`
+**Error routing:** `debug`
 
-### ⚠️ MANDATORY: Load Execution Skills
+1. Invoke `dispatch` and `tdd` via the `skill` tool.
+2. Work in place on the feature branch created in Phase 1. Clean `git status` first; create the branch here only if Phase 1 was skipped (e.g. resume into Phase 3). No worktrees.
+3. For each plan task, dispatch one of the default implementation seats (`implementer` or `implementer-b`, or `implementer-deep` for tasks flagged complex) via the `task` tool with the task brief from `dispatch/implementer-prompt.md`. The implementer seat follows TDD: failing test -> minimal implementation -> green -> commit (unless Parallel mode: stage only, main commits serially) -> receipt. Seat models and effort levels are pinned in the agent files; fallback rungs live in the AGENTS.md implementation rows.
+4. Independent tasks run in parallel as separate fresh subagents (parallel fan-out lives inside `dispatch`).
+5. Stream task results to the user as they return (task name, pass/fail, key outputs).
+6. Task failure routes to `debug`: root cause first, then re-dispatch (escalating to `implementer-deep` when a bug resists standard fixes). Unfixable after the debug loop: escalate to user with failure context.
 
-You MUST invoke via `skill` tool:
-- `subagent-driven-development` — dispatch pattern, keeps main context clean
-- `test-driven-development` — TDD workflow
-
-Both are required. No inline execution path.
-
-### Execution (subagent-driven, context-clean)
-
-1. Work in place on feature branch. Ensure clean `git status`, create feature branch if needed. No worktrees.
-2. For each task in plan: dispatch via `task` tool as fresh subagent (type: general or explore as needed)
-3. Each subagent follows TDD: write failing test → implement → pass
-4. Two-stage review after each task completes
-5. Main session only orchestrates - no direct code writes in main context, and report each subagent's task result to the user as it returns (task name, pass/fail, key outputs)
-6. If plan has independent sub-tasks: also invoke `dispatching-parallel-agents` for parallel dispatch
-
-**Error routing:** If any task fails:
-- Route to `systematic-debugging` skill
-- Fix root cause, re-run task
-- If unfixable: escalate to user with failure context
-
-**Parallel work:** If plan has independent sub-tasks, invoke `dispatching-parallel-agents` skill.
+Fix-loop caps: at most 3 implementer fix attempts per task, then route to `debug`. Debug gets at most 2 rotations; past that, STOP and escalate to the user with context. Escalation after exhausting caps is an explicit allowed stop point - the no-pause rule never overrides budget exhaustion.
 
 ---
 
 ## Phase 4: VERIFY
 
-**Skill:** `verification-before-completion`
+**Skill:** `verify`
 
-### ⚠️ MANDATORY: Load Verification Skill
-
-**You MUST invoke the `verification-before-completion` skill via the `skill` tool now.** It provides verification checklist and 30-second reality check framework.
-
-### Execution
-
-1. Run test suite. If none exists, check project docs for test command.
-2. Run lint (`npm run lint`, `ruff`, etc.)
-3. Run typecheck (`npm run typecheck`, `mypy`, etc.)
-4. Run build (`npm run build`, etc.)
-5. Cross-check implementation against spec requirements
-6. Fix any failures — do NOT proceed with failures
+1. Invoke `verify` via the `skill` tool.
+2. Run test suite, lint, typecheck, build. If no suite exists, run what the project docs define and note it.
+3. Cross-check implementation against the spec checklist.
+4. Fix failures or route to `debug`. Never proceed on failures.
 
 ---
 
-## Phase 5: PR
+## Phase 5: LAND - push and file the PR
 
-**Skill:** `requesting-code-review`
+**Skill:** `land`
 
-### ⚠️ MANDATORY: Load PR Skill
-
-**You MUST invoke the `requesting-code-review` skill via the `skill` tool now.** It provides pre-merge checklist and PR template.
-
-### Execution
-
-1. Push branch to remote
-2. Create PR with summary, test plan, linked spec (if spec was gitignored and local-only, reference it by path as local file instead of a repo link)
-3. Save PR URL
-4. Request review from configured reviewers
+1. Invoke `land` via the `skill` tool.
+2. Push the feature branch, create the PR: body leads with the problem, not the change inventory (`## Summary`, `## Changes`, `## Test plan`). Reference local spec/plan paths when they are gitignored.
+3. Save the PR URL.
 
 ---
 
-## Phase 6: ADVERSARIAL REVIEW LOOP (max 5 rounds)
+## Phase 6.5: MAKE-CI-GREEN
 
-**Skills:** `receiving-code-review` + `cavecrew-reviewer` (or `caveman-review`) + `verification-before-completion` (tests) + `systematic-debugging` on failure
-**Gate to Phase 7:** `REVIEW == PASS` **AND** `tests == green` (if tests exist). Both required.
-**Loop cap:** 5 rounds. No proceed on FAIL or red tests.
+**Skill:** `make-ci-green`
 
-### ⚠️ MANDATORY: Load Review Skills
+1. Invoke `make-ci-green` via the `skill` tool (skip if the repo has no CI/review bots; say "no CI to babysit" and move on).
+2. Watch checks and bot reviews. Real finding -> fresh fixer subagent -> rerun CI. No new information -> no rerun. No blind loops, no flake chasing.
 
-You MUST invoke via `skill` tool:
-- `receiving-code-review` — rigor over performative agreement
-- `cavecrew-reviewer` / `caveman-review` — adversarial one-line findings format (optional but recommended for reviewer subagent prompt)
+---
 
-### Adversarial Reviewer Stance
+## Phase 6: COUNCIL (consensus, max 3 rounds)
 
-Reviewer subagent assumes code is broken. Must try to find bugs, not confirm quality. Instructions for reviewer subagent:
+**Skills:** `council`
+**Gate to Phase 7:** consensus PASS from at least 2 of 3 reviewers **AND** tests green. Both required.
 
-> You are adversarial reviewer. Assume implementation has bugs. Check: spec compliance, edge cases, error handling, security, performance, test coverage, diff vs plan, hidden regressions. Output `PASS` only if zero blocking issues. Otherwise `FAIL` + findings as `path:line: 🔴 bug: ...` / `🟡 risk: ...` + concrete fix. Be strict.
+1. Invoke `council` via the `skill` tool.
+2. Dispatch three fresh reviewer subagents on three independent model families (`reviewer-a`, `reviewer-b`, `reviewer-c` agents, seat models pinned in their files). Each assumes the code is broken, hunts for bugs: spec compliance, edges, error handling, security, diff-vs-plan, regressions.
+3. Findings merge into one line per item: `path:line: emoji severity: problem. fix.`
+4. Round loop (max 3 rounds, never stops mid-loop):
+   - FAIL -> dispatch fresh fixer subagents (one per problem cluster, max 2 files each) addressing ALL findings -> push -> re-review next round.
+   - PASS + green -> break, proceed to Phase 7.
+   - CI freshness gate: if any council fix round pushed commits after the last green `make-ci-green` receipt, re-enter Phase 6.5 on the final HEAD before Phase 7. A stale green receipt never satisfies the gate.
+   - If that 6.5 re-entry itself pushes further CI-repair commits, the final HEAD needs one delta council round on the changed files (counted against the 3-round budget); when the round budget is exhausted alongside red CI, STOP and escalate instead of landing unreviewed.
+5. Rounds exhausted -> one escalation review with the AGENTS.md escalation row -> still failing -> STOP, escalate to user with round count, findings, test output. Do not proceed.
+6. No test suite: reviewer PASS + build/lint green suffices, reviewer flags `no tests` as yellow.
 
-### Execution — Loop (≤5 rounds, NEVER stops on FAIL)
-
-```
-round = 1..5:
-  1. Dispatch reviewer subagent via `task` tool (fresh context, reads spec + plan + diff + runs tests if present)
-     Reviewer outputs: PASS or FAIL + findings, plus tests status (green/red/ no-tests)
-  2. Run verification: `tests` (if existent) must be green. `lint`/`typecheck`/`build` if applicable. Record result.
-  3. Decision (NO STOPPING ON FAIL - the loop never pauses, never awaits the user, never
-     presents options mid-loop. It streams each round's result to the user in passing,
-     so progress stays visible in main):
-     - if PASS && tests green (or no tests but reviewer PASS + build green) → break loop, proceed to Phase 7
-     - if FAIL or tests red and round < 5 → IMMEDIATELY dispatch fix subagent(s) via `task`
-       (type: general/cavecrew-builder, 1-2 files max per subagent) to address ALL findings,
-       push fix, round++. This happens automatically in the same turn chain. A FAIL round is
-       never a stopping point, never a question - streamed reporting continues - it is only
-       the trigger for the next fix + re-review cycle.
-  4. If round == 5 and still FAIL/red → escalate to user with: round count, last review findings, test output, diff summary. Do NOT proceed to Phase 7. Await user decision (force-merge / more fixes / discard).
-     Round-5 escalation is the only time the loop stops for the user before PASS+green.
-     Streaming round results in passing is always allowed and required.
-```
-
-### Rules
-
-- Each round uses fresh subagents: reviewer never fixes, fixer never reviews (separation of concerns).
-- Fixer must run tests before declaring done; main verifies green.
-- No skipping rounds. No early FINISH on FAIL.
-- FAIL/red is NEVER a stopping point: never pause, never ask the user what to do, never present mid-loop options awaiting a reply. Streaming the round's verdict and findings into main while the loop continues onward is required, not forbidden - visibility is not a pause. Fix + re-review starts immediately, every time, rounds 1-4.
-- Round-5 escalation is the only time the loop stops for the user before PASS+green; streamed round updates never stop the loop and never require a reply.
-- If no test suite exists: reviewer PASS + build/lint green suffices, but reviewer must flag `no tests` as 🟡 risk.
-- Max 5 rounds enforced — 6th round is escalation, not auto-loop.
-
-### Opencode Loop Support
-
-Opencode has no native adversarial-review-loop primitive. Supported via composition:
-- Loop plugin `/loop --max-iterations 5` auto-re-prompt on `<promise>DONE</promise>` — usable but not review-specific.
-- Preferred here: manual `task` loop in main session (above) — keeps review history in main context, no plugin state file needed, works with `subagent-driven-development`.
-- If you want autonomous `/loop` variant: run `/loop adversarial review PR --max-iterations 5` and make reviewer emit `<promise>DONE</promise>` only on PASS+green. Both patterns valid; this skill uses manual loop for determinism.
-
+**Rules:** Reviewer never fixes, fixer never reviews. Fresh subagents every round. Rounds 1-2 never pause for user input; stream results in passing. Verify every finding against real code before acting.
 
 ---
 
 ## Phase 7: FINISH
 
-**Skill:** `finishing-a-development-branch`
+**Skill:** `land` (Gate 3)
 
-### ⚠️ MANDATORY: Load Finish Skill
-
-**You MUST invoke the `finishing-a-development-branch` skill via the `skill` tool now.** It provides merge decision framework.
-
-### Execution
-
-1. Verify tests pass on final state
-2. Present merge options to user (skip if auto-approve bypass active, default to keep branch plus PR URL):
-   - Option 1: Merge locally
-   - Option 2: PR already created (provide URL)
-   - Option 3: Keep branch as-is
-   - Option 4: Discard
-3. Execute user choice
-
-On completion: `memory add "oneshot completed: [task] on [branch]"`
+1. Verify tests pass on final state.
+2. Landed options: merge PR and clean up, keep PR open, keep branch, discard. Present options (skip under bypass: default keep PR open).
+3. `land` executes the user choice. It reuses the standard flow: create-PR-if-none, merge open PR, checkout default, pull (the "next feature" handoff).
+4. Write memory: `memory add "oneshot completed: [task] on [branch]"`.
 
 ---
+
+## State Artifact
+
+At every phase transition, update `docs/oneshot-state.md` (append or rewrite in place): phase, branch, PR URL, tests status, council round count, standing red findings (one line each). On interrupt, resume from the state artifact plus the spec and plan; the state file is the truth for round counters and standing findings - never re-open a closed round or re-spend a burnt budget. The state file is intentionally local-only state: never committed, never `git add -f`'d. If the target repo would track it (its docs/ tree is not ignored), park it in the repo's `.git/info/exclude` so it never dirties status checks; clean-status gates may ignore it as controller-owned output.
 
 ## Error Handling
 
 | Symptom | Route | Action |
-|---------|-------|--------|
-| Task fails during execution | systematic-debugging | Find root cause, fix, retry |
-| Unfixable bug | User escalation | Report phase + error + context |
-| Reviewer FAIL (rounds ≤5) | adversarial review loop | Fix subagent → re-review, repeat ≤5 |
-| Spec incomplete | Back to Phase 1 | Fix gaps, re-approve |
-| Plan has gaps | writing-plans | Add missing tasks inline |
-| User interrupts | Resume from artifacts | Resume from last completed phase artifact |
+| --- | --- | --- |
+| Task fails during execution | debug | Root cause, fix, retry |
+| Unfixable bug | User | Report phase + error + context |
+| Council FAIL (rounds 1-2) | council loop | Fix -> re-review automatically |
+| Council FAIL (round 3+ or escalation fails) | User | Stop, present findings + test output |
+| Spec incomplete | Phase 1 | Fix gaps, re-approve |
+| Plan has gaps | Phase 2 | Add missing tasks |
+| Reviewer model exhausted | AGENTS.md ladder | Demote role, announce, continue |
+| User interrupts | Resume | Restart from state artifact + spec + plan |
 
-## Red Flags
+## Red Flags - Never
 
-**Never:**
-- Skip phases (all 7 required)
-- Proceed without loading phase required skill(s)
-- Proceed without user approval on design and plan (unless auto-approve bypass active)
-- Merge without verification
-- Skip test-driven development
-- Ignore verification failures
-- Continue past unfixable error without user escalation
-- Proceed to FINISH on FAIL review or red tests
-- Stop, pause, report findings, ask the user what to do, or present options after a FAIL/red round (rounds 1-4) instead of auto-continuing fix → re-review
-- Delegate the whole pipeline or an entire phase to a subagent (only per-task/round dispatch, results streamed back to main)
-- Run the pipeline silently without announcing phase transitions and subagent results in main
-- Exceed 5 review rounds without escalation
-- Commit a gitignored file via `git add -f` (check `git check-ignore` before staging spec/plan)
-
-**Always:**
-- Load every required skill via `skill` tool
-- Run the pipeline in the main session, announcing each phase transition and streaming each subagent result
-- Validate prior phase artifact exists before next phase
-- Verify before claiming completion
-- Escalate after 5 failed review rounds
-- Escalate unfixable issues
-- Present structured choices to user
+- Skip a phase; proceed without loading the phase skills
+- Proceed past Gate 1/2 without approval (unless bypass at start)
+- Merge without verification; continue past failures
+- Pause, ask, or present options mid-loop after a FAIL round (1-2 in council, all rounds in task loop)
+- Delegate the whole pipeline or a whole phase to one subagent
+- Run silently: no transition announcements, no streamed results
+- Hardcode a model ID; route by role through AGENTS.md
+- Run the council on 1 healthy reviewer and call it consensus
+- `git add -f` a gitignored path
+- Exceed caps: 3 council rounds, silence after escalation
 
 ## Key Principles
 
-- **Full autonomy:** Execute all phases without pausing between them
-- **Artifact-based resume:** Prior phase artifacts (spec/plan) are truth for resume
-- **Error-hardened:** Route problems to systematic-debugging before escalating
-- **User consulted at 3 gates only:** design, plan choice, final branch decision (skipped entirely under auto-approve bypass)
-- **Subagents for implementation:** fresh context per task, no pollution — main session stays lean
-- **Context-clean guarantee:** Implementation code only via per-task `task` subagents; main holds spec/plan/PR state and orchestration
-- **Visibility guarantee:** Whole pipeline runs in the main session. Announce every phase transition, stream every subagent result back. Whole-pipeline or whole-phase delegation never happens
-- **TDD always:** subagents write failing test before production code
-- **Adversarial review gate:** FINISH only on PASS + green tests, max 5 rounds, reviewer ≠ fixer
+- **Gated autonomy:** 3 gates only, everything between runs without stopping
+- **Artifact-based resume:** state artifact + spec + plan on disk are the truth for resume
+- **Context-clean:** implementation only via fresh per-task subagents
+- **Visible:** every phase change and subagent result announced in main
+- **TDD always:** failing test before production code, per task
+- **Consensus over single gatekeeper:** council, independent families, honest degradation
+- **Model-agnostic skills:** routing lives only in AGENTS.md

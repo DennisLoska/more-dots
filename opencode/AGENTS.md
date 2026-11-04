@@ -1,31 +1,11 @@
 # Global Agent Instructions
 
-## Communication - Caveman Mode
-
-<!-- caveman-begin -->
-Respond terse like smart caveman. All technical substance stay. Only fluff die.
-
-Rules:
-- Drop: articles (a/an/the), filler (just/really/basically), pleasantries, hedging
-- Fragments OK. Short synonyms. Technical terms exact. Code unchanged.
-- Pattern: [thing] [action] [reason]. [next step].
-- Not: "Sure! I'd be happy to help you with that."
-- Yes: "Bug in auth middleware. Fix:"
-
-Switch level: /caveman lite|full|ultra|wenyan
-Stop: "stop caveman" or "normal mode"
-
-Auto-Clarity: drop caveman for security warnings, irreversible actions, user confused. Resume after.
-
-Boundaries: code/commits/PRs written normal.
-<!-- caveman-end -->
-
 ## Writing Style - No Emdash Ever
 
-- HARD BAN: NEVER output emdash character (Unicode U+2014, "—") in ANY context - chat, code, comments, strings, docs, file edits, commit messages. No exceptions unless user explicitly writes "use emdash" in current request, and even then confirm first.
+- HARD BAN: NEVER output the emdash character (Unicode U+2014) in ANY context - chat, code, comments, strings, docs, file edits, commit messages. No exceptions unless user explicitly writes "use emdash" in current request, and even then confirm first.
 - ALWAYS use hyphen (-), comma, colon, or period instead.
-- BEFORE every write/edit/output: mentally scan for "—" and replace. If you typed "—", you failed - fix before sending.
-- Self-check: if text contains "—", rewrite immediately. Treat as lint error, not style preference.
+- BEFORE every write/edit/output: mentally scan for U+2014 and replace. If you typed it, you failed - fix before sending.
+- Self-check: if text contains U+2014, rewrite immediately. Treat as lint error, not style preference.
 
 ## Verification Protocol
 
@@ -46,8 +26,8 @@ Red flags - never say these:
 
 - Prefer `rg` over `grep`, `fd` over `find`, `bun` over `npm`/`yarn` - but run `rg`/`fd` inside subagents, not inline in main.
 - **Hygiene rule:** Any search touching >1 file or >50 lines must delegate to subagent. Inline `read`/`bash ls` only for single file you will immediately `edit` or trivial existence check.
-- `cavecrew-investigator` (`task` `subagent_type: cavecrew-investigator`): read-only locator, compressed `file:line` table, no snippets, no fix suggestions. Use for "where is X defined", "what calls Y", "list all uses of Z", fast maps. ~60% smaller than `explore`.
-- `explore` (`task` `subagent_type: explore`): thorough reader, `file:line` + code blocks + env values + interaction graphs. Use when need full snippets, dep chains, planning context.
+- `scout` (`subagent` `agent: scout`): read-only locator, compressed `path:line` table, no snippets, no fix suggestions. Use for "where is X defined", "what calls Y", "list all uses of Z", fast maps. ~60% smaller than `explore`.
+- `explore` (`subagent` `agent: explore`): thorough reader, `file:line` + code blocks + env values + interaction graphs. Use when need full snippets, dep chains, planning context.
 - Main never loops `rg`/`fd`/`read` directly - subagent output compressed keeps main lean for long sessions.
 
 ## Process Management - Port-Targeted Restarts Only
@@ -78,19 +58,6 @@ Persistent memory across sessions. Stores learnings about projects, preferences,
 - Invoke: reference it naturally - "remember that..." or "what do you know about..."
 - It auto-recalls relevant context per-session.
 
-### caveman (local plugin)
-Provides output compression and slash commands.
-- `/caveman [lite|full|ultra|wenyan]` - sets compression level
-- `/caveman-commit` - generate terse conventional commit message
-- `/caveman-review` - one-line PR review findings
-- `/caveman:compress <file>` - compress a memory file into caveman format
-- Also activated by saying "caveman mode", "talk like caveman", "less tokens please"
-
-### superpowers (obra/superpowers)
-Full development methodology framework. Provides composable skills.
-- Auto-activates when relevant tasks are detected
-- Invoke explicitly: `use skill superpowers/<skill-name>`
-
 ## MCP Servers
 
 ### context7
@@ -103,65 +70,22 @@ Sandboxed file access outside the project directory. Allowed paths: `~/work/`, `
 - Use for reading files outside the current project tree.
 - Do NOT use for files inside the current project - native tools are better.
 
-### atlassian
-Jira and Confluence access.
-- Use for ticket lookups, searching Confluence docs.
-- Invoke via MCP tools when Jira issues are mentioned.
+### linear
+Linear issue tracking and project management access.
+- Use for ticket lookups, creating/updating issues, reading comments.
+- Invoke via MCP tools when Linear issues (`LOT-`, `LIN-`, etc.) are mentioned.
 
-### caveman-shrink
-MCP middleware that compresses MCP tool descriptions. Transparent - no manual invocation needed.
+### comfy-mcp
+Local/remote ComfyUI workflow execution, model management, and media generation.
 
-## Skills (Superpowers)
-
-Load via `use skill superpowers/<name>`:
-
-### Design & Planning
-- `brainstorming` - Socratic refinement of rough ideas into validated designs
-- `writing-plans` - decompose specs into bite-sized tasks with file paths
-- `executing-plans` - batch execute tasks with verification checkpoints
-
-### Development
-- `test-driven-development` - RED-GREEN-REFACTOR cycle
-- `subagent-driven-development` - parallel subagents with two-stage review
-- `using-git-worktrees` - isolated branches for parallel dev
-
-### Review & Ship
-- `requesting-code-review` - pre-merge checklist before asking for review
-- `receiving-code-review` - process and apply review feedback
-- `finishing-a-development-branch` - PR merge decision workflow
-- `dispatching-parallel-agents` - fan out work to multiple agents
-
-### Debugging
-- `systematic-debugging` - 4-phase root cause: reproduce → hypothesize → isolate → fix
-- `verification-before-completion` - confirm fix works before moving on
-
-### Meta
-- `writing-skills` - create new skills with TDD methodology
-- `using-superpowers` - overview of the entire skills system
-
-## Skills
-
-### oneshot
-Autonomous end-to-end SDLC via `/oneshot`. 7 phases: brainstorm → plan → implement → verify → PR → review → finish. Runs in the main session, phases visible live. Do NOT trust memory.
-- `/oneshot <task>` - run full pipeline
-- Load: `use skill oneshot`
-
-## Cavecrew Agents (subagents) - context-hygiene core
-
-### @cavecrew-investigator
-Read-only locator. `file:line` table, caveman-compressed. Use for: "where is X defined", "what calls Y", "list all uses of Z". ~60% smaller than `explore`, keeps main lean. Refuses fixes.
-
-### @cavecrew-reviewer
-Diff/branch/file reviewer. One line per finding `path:line: emoji severity: problem. fix.` Use for: "review this PR", "review my diff".
-
-### @cavecrew-builder
-Surgical 1-2 file editor. Typo fixes, single-function rewrites, mechanical renames. Max 2 files. No new abstractions.
+### sentry
+Sentry error tracking, issue inspection, and documentation search.
 
 ## Communication - No Follow-up Offers
 
 - NEVER ask user if they want work explained, visualized, mocked in HTML, or shown in browser. No exceptions.
 - Banned phrases: "want me to explain", "want a visual", "want HTML mockup", "shall I show in browser", any variant.
-- After task: report result terse. Stop. No question. No offer.
+- After task: report result. Stop. No question. No offer.
 
 ## GitHub - PR Format
 
@@ -173,7 +97,7 @@ Required structure:
 - `## Test plan` - checklist with `[x]`/`[ ]`, exact commands run plus result
 
 Rules:
-- Write in normal language (no caveman compression in PR bodies).
+- Write in clear normal language.
 - No emdash character anywhere (global ban still applies).
 - Avoid the word `delete` (any case) inside `gh` commands: the `gh *delete*` permission rule blocks execution. Use remove/trim/drop instead. This applies to the command text, including `--delete-branch` flags and body text passed on the same command line.
 - For `gh pr edit` body updates, pass the body inline and keep it free of that word.
