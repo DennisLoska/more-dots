@@ -13,7 +13,9 @@ Autonomous end-to-end SDLC: task → spec → plan → implementation → verifi
 
 **Announce at start:** "Oneshot pipeline starting for: [task description]"
 
-**Context hygiene:** This skill is subagent-driven. Main session orchestrates phases 1-2-4-5-6-7 directly (need user interaction), but Phase 3 EXECUTE is fully delegated to subagents via `task` tool. Main never writes implementation code inline.
+**Visibility:** This pipeline runs in the main session - the user watches every phase live. Announce each phase transition as you enter it, and summarize each subagent's result back in main as it returns.
+
+**Context hygiene:** Main session orchestrates phases 1-2-4-5-6-7 directly (need user interaction); Phase 3 EXECUTE and Phase 6 review rounds dispatch per-task subagents via `task` tool. Main never writes implementation code inline, and NEVER delegates a whole phase or the whole pipeline to a subagent.
 
 ---
 
@@ -56,7 +58,7 @@ digraph oneshot {
 }
 ```
 
-Run phases sequentially 1→7. No skipping. Validate prior phase artifact exists before proceeding.
+Run phases sequentially 1→7 in the main session. No skipping. Announce each phase when entering it. Validate prior phase artifact exists before proceeding.
 
 ---
 
@@ -121,7 +123,7 @@ Both are required. No inline execution path.
 2. For each task in plan: dispatch via `task` tool as fresh subagent (type: general or explore as needed)
 3. Each subagent follows TDD: write failing test → implement → pass
 4. Two-stage review after each task completes
-5. Main session only orchestrates — no direct code writes in main context
+5. Main session only orchestrates - no direct code writes in main context, and report each subagent's task result to the user as it returns (task name, pass/fail, key outputs)
 6. If plan has independent sub-tasks: also invoke `dispatching-parallel-agents` for parallel dispatch
 
 **Error routing:** If any task fails:
@@ -194,16 +196,18 @@ round = 1..5:
   1. Dispatch reviewer subagent via `task` tool (fresh context, reads spec + plan + diff + runs tests if present)
      Reviewer outputs: PASS or FAIL + findings, plus tests status (green/red/ no-tests)
   2. Run verification: `tests` (if existent) must be green. `lint`/`typecheck`/`build` if applicable. Record result.
-  3. Decision (NO STOPPING ON FAIL — the loop NEVER pauses, reports intermediate results,
-     asks the user what to do, or presents options mid-loop):
+  3. Decision (NO STOPPING ON FAIL - the loop never pauses, never awaits the user, never
+     presents options mid-loop. It streams each round's result to the user in passing,
+     so progress stays visible in main):
      - if PASS && tests green (or no tests but reviewer PASS + build green) → break loop, proceed to Phase 7
      - if FAIL or tests red and round < 5 → IMMEDIATELY dispatch fix subagent(s) via `task`
        (type: general/cavecrew-builder, 1-2 files max per subagent) to address ALL findings,
        push fix, round++. This happens automatically in the same turn chain. A FAIL round is
-       never a stopping point, never a user report, never a question — it is only the trigger
-       for the next fix + re-review cycle.
+       never a stopping point, never a question - streamed reporting continues - it is only
+       the trigger for the next fix + re-review cycle.
   4. If round == 5 and still FAIL/red → escalate to user with: round count, last review findings, test output, diff summary. Do NOT proceed to Phase 7. Await user decision (force-merge / more fixes / discard).
-     Round-5 escalation is the ONLY user contact the loop permits before PASS+green.
+     Round-5 escalation is the only time the loop stops for the user before PASS+green.
+     Streaming round results in passing is always allowed and required.
 ```
 
 ### Rules
@@ -211,8 +215,8 @@ round = 1..5:
 - Each round uses fresh subagents: reviewer never fixes, fixer never reviews (separation of concerns).
 - Fixer must run tests before declaring done; main verifies green.
 - No skipping rounds. No early FINISH on FAIL.
-- FAIL/red is NEVER a stopping point: never pause, never report findings to the user, never ask what to do, never present mid-loop options. Fix + re-review starts immediately, every time, rounds 1-4.
-- The ONLY permitted user contact before PASS+green is round-5 escalation.
+- FAIL/red is NEVER a stopping point: never pause, never ask the user what to do, never present mid-loop options awaiting a reply. Streaming the round's verdict and findings into main while the loop continues onward is required, not forbidden - visibility is not a pause. Fix + re-review starts immediately, every time, rounds 1-4.
+- Round-5 escalation is the only time the loop stops for the user before PASS+green; streamed round updates never stop the loop and never require a reply.
 - If no test suite exists: reviewer PASS + build/lint green suffices, but reviewer must flag `no tests` as 🟡 risk.
 - Max 5 rounds enforced — 6th round is escalation, not auto-loop.
 
@@ -271,11 +275,14 @@ On completion: `memory add "oneshot completed: [task] on [branch]"`
 - Continue past unfixable error without user escalation
 - Proceed to FINISH on FAIL review or red tests
 - Stop, pause, report findings, ask the user what to do, or present options after a FAIL/red round (rounds 1-4) instead of auto-continuing fix → re-review
+- Delegate the whole pipeline or an entire phase to a subagent (only per-task/round dispatch, results streamed back to main)
+- Run the pipeline silently without announcing phase transitions and subagent results in main
 - Exceed 5 review rounds without escalation
 - Commit a gitignored file via `git add -f` (check `git check-ignore` before staging spec/plan)
 
 **Always:**
 - Load every required skill via `skill` tool
+- Run the pipeline in the main session, announcing each phase transition and streaming each subagent result
 - Validate prior phase artifact exists before next phase
 - Verify before claiming completion
 - Escalate after 5 failed review rounds
@@ -289,6 +296,7 @@ On completion: `memory add "oneshot completed: [task] on [branch]"`
 - **Error-hardened:** Route problems to systematic-debugging before escalating
 - **User consulted at 3 gates only:** design, plan choice, final branch decision (skipped entirely under auto-approve bypass)
 - **Subagents for implementation:** fresh context per task, no pollution — main session stays lean
-- **Context-clean guarantee:** All code execution via `task` subagents; main only holds spec/plan/PR state
+- **Context-clean guarantee:** Implementation code only via per-task `task` subagents; main holds spec/plan/PR state and orchestration
+- **Visibility guarantee:** Whole pipeline runs in the main session. Announce every phase transition, stream every subagent result back. Whole-pipeline or whole-phase delegation never happens
 - **TDD always:** subagents write failing test before production code
 - **Adversarial review gate:** FINISH only on PASS + green tests, max 5 rounds, reviewer ≠ fixer
