@@ -7,7 +7,7 @@
   "lsp": {},
   "skills": {
     "paths": [
-      "/home/dennis/.cache/opencode/packages/superpowers@git+https:/github.com/obra/superpowers.git/node_modules/superpowers/skills"
+      "{env:HOME}/.cache/opencode/packages/superpowers@git+https:/github.com/obra/superpowers.git/node_modules/superpowers/skills"
     ]
   },
   "permission": {
@@ -42,8 +42,7 @@
     "doom_loop": "allow"
   },
   "instructions": [
-    "AGENTS.md",
-    "~/.config/opencode/skills/caveman/SKILL.md"
+    "AGENTS.md"
   ],
   "mcp": {
     "context7": {
@@ -66,10 +65,9 @@
         "npx",
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/home/dennis/work",
-        "/home/dennis/content_library",
-        "/tmp",
-        "/run/user/1000/gvfs"
+        "{env:HOME}/work",
+        "{env:HOME}/content_library",
+        "/tmp"
       ],
       "enabled": true
     },
@@ -78,19 +76,17 @@
       "command": [
         "npx",
         "-y",
-        "chrome-devtools-mcp@latest",
-        "--executablePath",
-        "/usr/bin/chromium"
+        "chrome-devtools-mcp@latest"
       ],
       "enabled": true
     },
     "comfy-mcp": {
       "type": "local",
       "command": [
-        "/home/dennis/.local/share/mise/installs/python/3.13.12/bin/comfy-mcp"
+        "comfy-mcp"
       ],
-      "env": {
-        "COMFY_BIN": "/home/dennis/.local/share/mise/installs/python/3.13.12/bin/comfy"
+      "environment": {
+        "COMFYUI_URL": "http://100.79.86.17:8188"
       },
       "enabled": true
     },
