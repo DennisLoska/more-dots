@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DIR=$(fd --type d . "$HOME" | fzf)
 [ -z "$DIR" ] && exit 0
 
