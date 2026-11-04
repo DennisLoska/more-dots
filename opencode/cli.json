@@ -4,12 +4,41 @@
     "name": "lucent-orng"
   },
   "diffs": {
-    "wrap": "word"
+    "wrap": "word",
+    "view": "auto",
+    "tree": true,
+    "single": false
   },
   "session": {
-    "sidebar": "auto",
+    "sidebar": "hide",
     "scrollbar": false,
-    "thinking": "hide"
+    "thinking": "hide",
+    "image_preview": true,
+    "permissions": "autoaccept"
   },
-  "animations": true
+  "animations": true,
+  "tabs": {
+    "mode": "off",
+    "layout": "vertical",
+    "indicators": "status",
+    "scope": "cwd"
+  },
+  "scroll": {
+    "speed": 6
+  },
+  "prompt": {
+    "paste": "compact",
+    "image_preview": true
+  },
+  "attention": {
+    "notifications": false,
+    "sound": false
+  },
+  "terminal": {
+    "title": true,
+    "copy": "select"
+  },
+  "debug": {
+    "devtools": false
+  }
 }

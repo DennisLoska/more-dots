@@ -83,7 +83,7 @@
     "comfy-mcp": {
       "type": "local",
       "command": [
-        "comfy-mcp"
+        "/opt/homebrew/bin/comfy-mcp"
       ],
       "environment": {
         "COMFYUI_URL": "http://100.79.86.17:8188"
