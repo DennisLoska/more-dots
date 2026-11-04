@@ -142,7 +142,7 @@ Load via `use skill superpowers/<name>`:
 ## Skills
 
 ### oneshot
-Autonomous end-to-end SDLC via `/oneshot`. 7 phases: brainstorm → plan → implement → verify → PR → review → finish. Enforced via git tags + entry/exit gates. Do NOT trust memory.
+Autonomous end-to-end SDLC via `/oneshot`. 7 phases: brainstorm → plan → implement → verify → PR → review → finish. Runs in the main session, phases visible live. Do NOT trust memory.
 - `/oneshot <task>` - run full pipeline
 - Load: `use skill oneshot`
 
