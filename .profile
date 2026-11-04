@@ -25,8 +25,3 @@ fi
 if [ -d "$HOME/.local/bin" ]; then
 	PATH="$HOME/.local/bin:$PATH"
 fi
-
-# go
-export GOPATH=$HOME/go
-export GOBIN=$GOPATH/bin
-export PATH=$PATH:$GOBIN
