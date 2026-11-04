@@ -1,16 +1,20 @@
 # shell completions configuration
-fpath=("/home/dennis/.zsh/completions" $fpath)
+if [ -d "$HOME/.zsh/completions" ]; then
+  fpath=("$HOME/.zsh/completions" $fpath)
+fi
 autoload -Uz compinit
 compinit
 
-# load bash aliases
+# load aliases
 if [ -f ~/.zsh_aliases ]; then
   . ~/.zsh_aliases
 fi
 
-# amazing ssh
-eval $(ssh-agent -s)
-ssh-add ~/.ssh/flux >>/dev/null
+# brew (macOS only, no-op on Linux)
+if [ -x /opt/homebrew/bin/brew ]; then
+  export HOMEBREW_NO_ANALYTICS=1
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 
 # path variables
 if [ -d "$HOME/bin" ]; then
@@ -42,12 +46,13 @@ export PATH=$PATH:$GOBIN
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# Noji settings
-export NOJI_CONFIG_HOME="$HOME/.config"
+# editor
 export EDITOR="nvim"
 
-# Zoxide
-eval "$(zoxide init zsh)"
+# zoxide
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
 
 # emacs mode
 bindkey -e
@@ -56,12 +61,18 @@ bindkey -e
 eval "$(starship init zsh)"
 
 # mise
-eval "$(mise activate zsh)"
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
 
 # CUDA CUDA CUDA
 export CUDA_VISIBLE_DEVICES=0
 
-# anon
-export OPENSPEC_TELEMETRY=0
 
-. "$HOME/.local/share/../bin/env"
+# load local bin env if present
+if [ -f "$HOME/.local/bin/env" ]; then
+  . "$HOME/.local/bin/env"
+fi
+
+# keep it secret, keep it safe
+export LINEAR_API_KEY="redacted"
