@@ -17,13 +17,15 @@ Finish a development branch: PR body that leads with the problem, then the merge
    - `## Summary` - 1-2 sentences. The problem it solves first, not an inventory of files touched
    - `## Changes` - bullets grouped by area, `path` in backticks
    - `## Test plan` - `[x]`/`[ ]` checklist, exact commands run and their results
-   - No emdash anywhere. No the word "delete" inside gh command text (use remove/trim/drop, applies to body strings on the same command line); use `gh pr remove` style alternatives or quote around it, and for branch removal on merge use `gh pr merge` without such a flag, cleanup happens after
+   - No emdash anywhere. No the word "delete" inside gh command text (use remove/trim/drop, applies to body strings on the same command line); if the body must mention the word, rephrase it; if a PR body edit is needed use `gh pr edit <number> --body-file <file>`, and for branch removal on merge use `gh pr merge` without such a flag, cleanup happens after
    - Local-only spec/plan (gitignored)? Reference them by path as local files
 4. Save PR URL, announce it.
 
 ## Part 2 - Finish options (oneshot Phase 7, Gate 3)
 
-Present exactly these, get user choice:
+When `auto-approve: true` is present (read from the spec header, or from the dispatch prompt when oneshot passes it), skip the menu: default to Keep PR open, report the URL, and continue to the handoff without waiting.
+
+Otherwise present exactly these, get user choice:
 
 1. **Merge PR** - `gh pr merge --squash -t "<subject>"` then handoff (Part 3)
 2. **Keep PR open** - done, report URL
@@ -34,10 +36,15 @@ Present exactly these, get user choice:
 
 Same menu as the standalone flow, reusable any time a PR is merged:
 
-1. Checkout default branch: `git checkout master` (or repo default if different)
-2. Pull: `git pull --ff-only`
-3. Prune merged local branches only if user asked
-4. Report: "Ready for next task on `<default branch>` at `<short-sha>`"
+1. **Standard checkout (not a linked worktree, or default branch not checked out elsewhere):**
+   - Checkout default branch: `git checkout master` (or repo default if different)
+   - Pull: `git pull --ff-only`
+   - Prune merged local branches only if user asked: `git branch -d <branch>` per branch, never a wildcard, never `git branch -D` without explicit user instruction.
+   - Report: "Ready for next task on `<default branch>` at `<short-sha>`"
+2. **Linked git worktree (where `<default branch>` is already checked out in the main repository root, e.g. a T3 Code worktree thread):**
+   - Do not run `git checkout <default>` inside the linked worktree if git reports `<default>` is already used by another worktree. Instead, fast-forward the default branch ref via `git fetch origin <default>:<default>` (or `git fetch origin <default>`).
+   - If the session is inside a temporary worktree the user asked to clean up, move the session back to the main checkout (`tools.opencode.session_move`) and remove the worktree (`tools.opencode.worktree_remove`), then prune the merged local branch if requested (`git branch -d <branch>`). Otherwise, detach HEAD at `origin/<default>` (`git checkout --detach origin/<default>`) so the merged feature branch is free and the worktree stays at the latest default commit.
+   - Report: "Ready for next task on `<default branch>` at `<short-sha>`"
 
 ## Rules
 
@@ -46,3 +53,4 @@ Same menu as the standalone flow, reusable any time a PR is merged:
 - Never commit to master directly; master advances only via PR merge
 - Merge decisions respect the AGENTS.md PR format rules verbatim
 - Discard requires explicit user instruction in the current turn
+- Every `gh` command in this skill must be a real subcommand; verify with `gh <cmd> --help` before using a new one.
