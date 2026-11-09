@@ -37,7 +37,8 @@
   },
   "instructions": [
     "AGENTS.md",
-    "~/.config/opencode/HARNESS.md"
+    "~/.config/opencode/HARNESS.md",
+    "~/.config/opencode/PROVIDERS.md"
   ],
   "mcp": {
     "context7": {

@@ -1,9 +1,10 @@
-# harness 578cc27
+# harness 238db46
+# profile tri
 agents/reviewer-b.md
-agents/implementer-b.md
 agents/reviewer-c.md
 agents/patch.md
 agents/reviewer-a.md
+agents/tester.md
 agents/reviewer-esc.md
 agents/scout.md
 agents/implementer-deep.md
@@ -21,6 +22,7 @@ skills/dispatch/quality-reviewer-prompt.md
 skills/dispatch/spec-reviewer-prompt.md
 skills/dispatch/implementer-prompt.md
 skills/dispatch/SKILL.md
+skills/dispatch/tester-prompt.md
 skills/codebase-design/DESIGN-IT-TWICE.md
 skills/codebase-design/SKILL.md
 skills/codebase-design/DEEPENING.md
@@ -35,3 +37,4 @@ skills/debug/find-polluter.sh
 HARNESS.md
 NOTICE
 LICENSE
+PROVIDERS.md
