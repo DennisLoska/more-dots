@@ -61,9 +61,10 @@
         "npx",
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "{env:HOME}/work",
-        "{env:HOME}/content_library",
-        "/tmp"
+        "/home/dennis/work",
+        "/home/dennis/content_library",
+        "/tmp",
+        "/run/user/1000/gvfs"
       ],
       "enabled": true
     },
@@ -72,17 +73,19 @@
       "command": [
         "npx",
         "-y",
-        "chrome-devtools-mcp@latest"
+        "chrome-devtools-mcp@latest",
+        "--executablePath",
+        "/usr/bin/chromium"
       ],
       "enabled": true
     },
     "comfy-mcp": {
       "type": "local",
       "command": [
-        "/opt/homebrew/bin/comfy-mcp"
+        "/home/dennis/.local/share/mise/installs/python/3.13.12/bin/comfy-mcp"
       ],
-      "environment": {
-        "COMFYUI_URL": "http://100.79.86.17:8188"
+      "env": {
+        "COMFY_BIN": "/home/dennis/.local/share/mise/installs/python/3.13.12/bin/comfy"
       },
       "enabled": true
     },
@@ -91,6 +94,11 @@
       "url": "https://mcp.sentry.dev/mcp/dennis-loska",
       "enabled": true,
       "oauth": {}
+    },
+    "cloudflare": {
+      "type": "remote",
+      "url": "https://mcp.cloudflare.com/mcp",
+      "enabled": true
     }
   },
   "provider": {

@@ -5,12 +5,13 @@ description: Backup opencode config to ~/work/more-dots. Executes ~/scripts/open
 
 # backup-opencode
 
-Syncs local opencode config into dotfiles repo (`more-dots`) and optionally commits/pushes.
+Syncs local opencode config into dotfiles repo (`more-dots`) and optionally commits/pushes, while stripping/excluding secrets and runtime state.
 
 ## What it does
 
 - Runs `~/scripts/opencode-backup.sh` (bash, `MORE_DOTS_DIR` var at top)
-- Copies `~/.config/opencode/` → `~/work/more-dots/opencode/` (not `.opencode`) via `rsync -av --delete --exclude=node_modules --exclude=.git` (fallback `cp -a`)
+- Copies `~/.config/opencode/` -> `~/work/more-dots/opencode/` (not `.opencode`) via `rsync -av --delete` excluding `node_modules`, `.git`, `service.json`, `auth.json`, `.credentials.json`, `state`, and `.bak` files
+- Scans and redacts any inline API keys or tokens before staging
 - In `~/work/more-dots` git repo: `git add opencode`, `git commit -m "backup: opencode <timestamp>"`, `git push` if changes exist
 
 ## Usage
@@ -21,15 +22,15 @@ When this skill is invoked, execute:
 bash ~/scripts/opencode-backup.sh
 ```
 
-No args needed — defaults to copy + commit + push if changes.
+No args needed - defaults to copy + commit + push if changes.
 
 ## Options (pass through to script)
 
-- `--no-commit` — copy only, skip git
-- `--no-push` — commit but don't push
-- `--dry-run` — preview rsync + git status without writing
-- `-m "msg"` / `--commit-msg "msg"` — custom commit message
-- `-h` / `--help` — help
+- `--no-commit` - copy only, skip git
+- `--no-push` - commit but don't push
+- `--dry-run` - preview rsync + git status without writing
+- `-m "msg"` / `--commit-msg "msg"` - custom commit message
+- `-h` / `--help` - help
 
 Examples:
 
@@ -41,6 +42,6 @@ bash ~/scripts/opencode-backup.sh -m "backup: opencode manual"
 
 ## Notes
 
-- `MORE_DOTS_DIR` is defined at top of script — edit there to change target.
-- `node_modules` and `.git` are excluded from sync (huge, ignored by git).
+- `MORE_DOTS_DIR` is defined at top of script - edit there to change target.
+- `node_modules`, `.git`, `service.json`, and `state` are excluded from sync so no secrets or heavy artifacts leak.
 - If repo has no changes, script exits cleanly with "nothing to commit".

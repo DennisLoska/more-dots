@@ -1,1 +1,29 @@
 .opencode/opencode-loop/
+
+# Never track provider secrets, tokens, or auth files
+**/service.json
+**/auth.json
+**/auth.json.lock
+**/auth.lock
+**/.credentials.json
+**/credentials.json
+**/mcp-needs-auth-cache.json
+**/mcp-oauth-locks/
+**/*.env
+**/*.env.*
+!**/*.env.example
+
+# Never track local runtime state, history, or sqlite databases
+**/*.sqlite
+**/*.sqlite-*
+**/*.db
+**/*.db-*
+**/history.jsonl
+**/installation_id
+**/state/
+**/sessions/
+**/session-env/
+**/shell_snapshots/
+**/shell-snapshots/
+**/cache/
+**/backups/

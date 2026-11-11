@@ -1,7 +1,7 @@
 ---
 description: Council escalation reviewer. Last-resort adversarial audit after the 3-seat council burned its rounds, or final tie-breaker. Independent of all primary council seat families.
 mode: subagent
-model: opencode-go/kimi-k3.1-pro#high
+model: opencode-go/deepseek-v4.1-flash#high
 permissions:
   - action: read
     resource: "*"

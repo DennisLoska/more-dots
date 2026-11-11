@@ -1,6 +1,7 @@
 ---
 description: Council reviewer seat A. Adversarial code audit from the first independent model family, findings only. Dispatched by the council skill, never fixes anything.
 mode: subagent
+model: opencode-go/deepseek-v4.1-flash#high
 permissions:
   - action: read
     resource: "*"

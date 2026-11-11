@@ -15,34 +15,36 @@ Execute a plan by dispatching a fresh subagent per task, with two-stage review a
 
 **Oneshot is the hub:** this skill is Phase 3 of the oneshot pipeline. Never delegate a whole plan or the whole pipeline to one subagent. Executing a plan always happens here; the main session orchestrates, subagents execute.
 
+## Step 0: Routing Bootstrap
+
+<HARD-GATE>
+Before dispatching ANY subagent (`tester`, `implementer`, `implementer-deep`, `patch`, or `task-reviewer`), verify all four bootstrap checks:
+1. **Load `HARNESS.md` and `PROVIDERS.md` into context:** Check whether `# Cybernetic SDLC Harness` (`HARNESS.md`) AND the active provider profile routing table (`PROVIDERS.md`) are BOTH already loaded verbatim in this session. If either is missing, read `../_harness/HARNESS.md` and `../_harness/PROVIDERS.md` (or `../../HARNESS.md` and `../../PROVIDERS.md`) relative to this skill's directory NOW before taking any other action.
+2. **Select the `HARNESS.md` Dispatch Adapter path (including lazy MCP servers):** Inspect both eager tools and any lazy-loaded MCP server schemas in your environment before choosing a subagent tool. Run the one-time session capability check required by `HARNESS.md` `## Dispatch Adapter` Path 1 when cross-provider orchestration tools are present (reading their lazy MCP schema files first when needed), and NEVER fall back to native same-session subagent tools while Path 1 orchestration tools are available.
+3. **Forbid same-model inheritance:** Every dispatch MUST resolve its exact `<provider>/<model> (<effort>)` rung from `PROVIDERS.md` (checking `../../state/quota-ledger.tsv`) and start with the header defined in `HARNESS.md` `## Dispatch Adapter`: seat dispatches (`scout`, `tester`, `implementer`, `implementer-deep`, `patch`, `reviewer-*`) carry `Role contract:` + `Rung:` (or `Rung:` only on autoloaded pinned seats), while `task-reviewer` and `design` carry `Rung:` only (no `Role contract:`, as they have no agent file). Spawning native `inherit`/same-model subagents when `PROVIDERS.md` routes roles across distinct providers or model families is forbidden.
+4. **Forbid driver inline execution:** The main driver session orchestrates and NEVER writes implementation or production code inline. All implementation edits, test changes, and fixes MUST be performed through fresh subagents (`tester`, `implementer`, `implementer-deep`, or `patch`) routed via `HARNESS.md` Dispatch Adapter. Writing code directly inline in the main orchestrator session is a hard protocol violation.
+</HARD-GATE>
+
 ## When to Use
 
 ```dot
 digraph when_to_use {
     "Have implementation plan?" [shape=diamond];
-    "Tasks mostly independent?" [shape=diamond];
-    "Run in this session?" [shape=diamond];
-    "dispatch" [shape=box];
-    "shape first" [shape=box];
-    "Manual execution" [shape=box];
-
-    "Have implementation plan?" -> "Tasks mostly independent?" [label="yes"];
+    "Have implementation plan?" -> "dispatch" [label="yes"];
     "Have implementation plan?" -> "shape first" [label="no"];
-    "Tasks mostly independent?" -> "Run in this session?" [label="yes"];
-    "Tasks mostly independent?" -> "Manual execution" [label="no - tightly coupled"];
-    "Run in this session?" -> "dispatch" [label="yes"];
 }
 ```
 
-**vs manual execution:**
-- Fresh subagent per task, no context pollution
+**Autonomous Subagent Isolation:**
+In the cybernetic harness, the driver orchestrates and NEVER writes implementation code inline. All implementation occurs via isolated subagents:
+- Fresh subagent per task, zero context pollution
 - Two-stage review after each task: spec compliance first, then code quality
-- Faster iteration, no human-in-loop between tasks
+- Strict author-family tracking recorded per task commit
 - Subagents can ask questions before and during work
 
 ## Working Branch & Worktrees
 
-Work on a feature branch from a clean tree - either in the current checkout or inside a dedicated git worktree (created with the host's worktree tool, e.g. OpenCode `tools.opencode.worktree_create` + `session_move`, or a T3 Code worktree thread). If the working tree is on `master` or `main`, create a feature branch or worktree before dispatching. Never develop on `master` or `main` without explicit user consent; `master`/`main` advances only via PR merge (the `land` skill handles that).
+Work on a feature branch from a clean tree - either in the current checkout or inside a dedicated git worktree (created with the host's worktree tool when available, or `git worktree`). If the working tree is on `master` or `main`, create a feature branch or worktree before dispatching. Never develop on `master` or `main` without explicit user consent; `master`/`main` advances only via PR merge (the `land` skill handles that).
 
 ## The Process
 
@@ -106,7 +108,7 @@ Standalone (no oneshot): after final review PASS, run the verify skill yourself,
 
 ## Model Routing
 
-Skills never hardcode model IDs. Route every subagent by role through the active provider profile (`PROVIDERS.md`) and the AGENTS.md Routing Rules, dispatching through the AGENTS.md Dispatch Adapter (which chooses the native or `delegate_task` path per rung). Every dispatch names a rung so nothing inherits the main session model by accident.
+Skills never hardcode model IDs. Route every subagent by role through the active provider profile (`PROVIDERS.md`) and the AGENTS.md Routing Rules, dispatching through the AGENTS.md Dispatch Adapter (which selects the host dispatch path per rung; if `HARNESS.md` and `PROVIDERS.md` are not already in context, read `../_harness/HARNESS.md` and `../_harness/PROVIDERS.md` or `../../HARNESS.md` and `../../PROVIDERS.md` relative to this skill's directory; quota ledger read/updated via shell at `../../state/quota-ledger.tsv`). Every dispatch names a rung so nothing inherits the main session model by accident.
 
 **Testing and implementation seats** (models and effort levels per the active provider profile; native pin rendered at install):
 - `tester` - the red-step test author and script runner (rungs from the active provider profile). For any plan task with behaviour to test, dispatch `tester` first (`tester-prompt.md`) to write the failing tests, run them, confirm they fail for the right reason, and leave them uncommitted in the working tree.
@@ -115,7 +117,7 @@ Skills never hardcode model IDs. Route every subagent by role through the active
 
 On a usage-limit/429 error (`exhausted`, recorded in `<dest>/state/quota-ledger.tsv`), an `unreachable` rung, a failed `transient` retry, or a soft-cap reserved pool: follow the AGENTS.md Routing Rules (quota pools & ledger, failure classes, soft cap & reserve, and backup ladder walk) to re-dispatch the same role on the next eligible rung of its ladder in the active provider profile, announce the demotion, and continue. An implementation seat (`implementer`, `implementer-deep`) with no reachable ladder rung hands the task to the other implementation seat (`implementer-deep` <-> `implementer`, never revisiting an exhausted seat) before walking `## Backup ladder` (`backup: <role> -> <provider>/<model>`); when no eligible rung remains after the backup ladder, stop and report `budget stop: <role>` with exhausted pools and `earliest resume` per AGENTS.md Routing Rules (budget stop & resume). After each task commit, the controller records the implementing rung's family (and the `tester` rung's family when `tester`-written tests are committed) for the author-family rule (oneshot Phase 3, step 7).
 
-**Stage reviewers dispatch ad-hoc:** spec-reviewer and quality-reviewer subagents are role `task-reviewer` from the active provider profile, chosen after the seat matrix call above; skip any `task-reviewer` rung whose family wrote the code or `tester` red tests for that task (AGENTS.md Routing Rules, author independence). They are not seat agents; fresh context each time, explicit rung each time.
+**Stage reviewers dispatch ad-hoc:** spec-reviewer and quality-reviewer subagents are role `task-reviewer` from the active provider profile, chosen after the seat matrix call above; skip any `task-reviewer` rung whose family wrote the code or `tester` red tests for that task unless non-author families are unreachable on a standalone single-family host (`degraded task-review: single-family host (<family>)`, per `AGENTS.md` Routing Rules, author independence) or exhausted/unreachable (`degraded task-review: non-author families exhausted/unreachable (reviewed by <model>)`, requiring a model distinct from the author model). They are not seat agents; fresh context each time, explicit rung each time.
 
 **Seat matrix (route every test/implementation step through a named seat agent; models and effort levels per the active provider profile):**
 - Red step for a task with behaviour to test -> `tester` (writes failing tests in the working tree without committing), followed by `implementer` (green + refactor + commit).
@@ -182,7 +184,7 @@ Tester:
 
 Implementer: "Before I begin - should the hook be installed at user or system level?"
 
-You: "User level (~/.config/opencode/hooks/)"
+You: "User level (~/.config/my-tool/hooks/)"
 
 Implementer: "Got it. Implementing now..."
 [Later] Implementer:

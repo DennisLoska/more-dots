@@ -1,0 +1,11 @@
+[tui]
+screen_reader_detection_done = true
+
+[tui.model_availability_nux]
+"gpt-6.1-sol" = 1
+
+[projects."/home/dennis/work/kickstart"]
+trust_level = "trusted"
+
+[mcp_servers.cloudflare]
+url = "https://mcp.cloudflare.com/mcp"

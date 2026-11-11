@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cloudflare": {
+      "disabled": false,
+      "serverUrl": "https://mcp.cloudflare.com/mcp"
+    }
+  }
+}
